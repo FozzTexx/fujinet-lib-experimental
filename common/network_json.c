@@ -44,9 +44,12 @@ int16_t network_json_query(const char *devicespec, const char *query, char *buff
   }
 
   // if last char is 0x9b, 0x0A or 0x0D, then set that char to nul, else just null terminate
-  c = buffer[total - 1];
-  if (c == 0x9B || c == 0x0A || c == 0x0D)
+  while (total) {
+    c = buffer[total - 1];
+    if (c != 0x9B && c != 0x0A && c != 0x0D)
+      break;
     total--;
+  }
   buffer[total] = '\0';
 
   return total;
