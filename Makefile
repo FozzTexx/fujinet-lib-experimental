@@ -1,5 +1,5 @@
 PRODUCT = fujinet.lib
-PLATFORMS = coco apple2 atari c64 msx
+PLATFORMS = coco apple2 atari c64 msx msxrom
 PLATFORMS += msdos
 PLATFORMS += adam
 
@@ -11,7 +11,7 @@ PLATFORMS += adam
 
 # SRC_DIRS may use the literal %PLATFORM% token.
 # It expands to the chosen PLATFORM plus any of its combos.
-SRC_DIRS = common bus/%PLATFORM% functions/%PLATFORM%
+SRC_DIRS = common bus/%PLATFORM% functions/%PLATFORM%/**
 INCLUDE_DIRS = include include/%PLATFORM%
 CFLAGS = -DBUILD_$(PLATFORM_UC)
 

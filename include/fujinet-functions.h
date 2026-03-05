@@ -1,3 +1,17 @@
-void cputsxy(int x, inty, string str);
-void fuji_base64_decode_output();
-void gotox();
+/* 
+extern void __FASTCALL__ cputs_xy(unsigned char x, unsigned char y, const char* s);
+extern void __FASTCALL__ goto_x(unsigned char x); 
+*/
+
+void cputs_xy(unsigned char x, unsigned char y, const char* s);
+void goto_x(unsigned char x); 
+
+bool fuji_base64_encode_input(char *s, uint16_t len);
+bool fuji_base64_encode_length(unsigned long *len);
+bool fuji_base64_encode_output(char *s, uint16_t len);
+bool fuji_base64_encode_compute(void);
+
+bool fuji_base64_decode_compute(void);
+bool fuji_base64_decode_input(char *s, uint16_t len);
+bool fuji_base64_decode_length(unsigned long *len);
+bool fuji_base64_decode_output(char *s, uint16_t len);
