@@ -3,6 +3,7 @@ DISK = $(R2R_PD)/$(PRODUCT_BASE).vdk
 LIBRARY = $(R2R_PD)/lib$(PRODUCT_BASE).$(PLATFORM).a
 DISK_TOOL = dragondos
 DISK_TOOL_INFO = https://www.rolfmichelsen.com/dragontools/
+COMPILER = cmoc
 
 MWD := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))..)
 include $(MWD)/common.mk

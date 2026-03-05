@@ -3,6 +3,7 @@ DISK = $(R2R_PD)/$(PRODUCT_BASE).atr
 LIBRARY = $(R2R_PD)/$(PRODUCT_BASE).$(PLATFORM).lib
 DISK_TOOL = dir2atr
 DISK_TOOL_INFO = https://www.horus.com/~hias/atari/\#atarisio (Linux) or https://github.com/EricCarrGH/atari-dist/releases/ ( Mac)
+COMPILER = cc65
 
 MWD := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))..)
 include $(MWD)/common.mk

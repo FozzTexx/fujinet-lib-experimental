@@ -3,6 +3,7 @@ DISK = $(R2R_PD)/$(PRODUCT_BASE).dsk
 LIBRARY = $(R2R_PD)/lib$(PRODUCT_BASE).$(PLATFORM).a
 DISK_TOOL = decb
 DISK_TOOL_INFO = https://github.com/nitros9project/toolshed
+COMPILER = cmoc
 
 MWD := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))..)
 include $(MWD)/common.mk
