@@ -42,12 +42,6 @@ static void hexdump(uint8_t *buffer, int count)
 #endif /* UNUSED */
 
 
-#define milliseconds_to_jiffy(millis) ((millis) / (VDP_IS_PAL ? 20 : 1000 / 60))
-
-#define TIMEOUT         milliseconds_to_jiffy(100)
-#define TIMEOUT_SLOW	milliseconds_to_jiffy(15 * 1000)
-#define MAX_RETRIES	1
-
 enum {
   SLIP_END     = 0xC0,
   SLIP_ESCAPE  = 0xDB,
@@ -76,6 +70,8 @@ typedef struct {
 #define MAX_PACKET      (512 + sizeof(fujibus_header) + 4) // sector + header + secnum
 static uint8_t fb_buffer[MAX_PACKET * 2 + 2];              // Enough room for SLIP encoding
 static fujibus_packet *fb_packet;
+
+bool err;
 
 /* This function expects that fb_packet is one byte into fb_buffer so
    that there's already room at the front for the SLIP_END framing
@@ -316,3 +312,55 @@ uint16_t fuji_bus_write(uint8_t device, const void *buffer, size_t length)
   NETCALL_B12_D(FUJICMD_WRITE, device - FUJI_DEVICEID_NETWORK + 1, length, buffer, length);
   return length;
 }
+
+
+/* Don't know if I should have the base64 functions here or on their own separate .c files */
+
+/* bool fuji_base64_decode_compute(void);
+{
+  err = FUJICALL(FUJICMD_BASE64_DECODE_COMPUTE);
+  return err;
+}
+
+bool fuji_base64_decode_input(char *s, uint16_t len);
+{
+  err = FUJICALL_B12_D(FUJICMD_BASE64_DECODE_INPUT, length, s, len);
+  return err;
+}
+
+bool fuji_base64_decode_length(unsigned long *len);
+{
+  err = FUJICALL_RV(FUJICMD_BASE64_DECODE_LENGTH, len, sizeof(len))
+  return err;
+}
+
+bool fuji_base64_decode_output(char *s, uint16_t len) 
+{
+  err = FUJICALL_B12_RV(FUJICMD_BASE64_DECODE_INPUT, length, s, len);
+  return err;
+}
+
+bool fuji_base64_decode_compute(void);
+{
+  err = FUJICALL(FUJICMD_BASE64_ENCODE_COMPUTE);
+  return err;
+}
+
+bool base64_encode_input(const void *buffer, size_t length)  
+{
+  bool err = FUJICALL_B12_D(FUJICMD_BASE64_ENCODE_INPUT, length, buffer, length);
+  return err;
+}
+
+bool fuji_base64_encode_length(unsigned long *len);
+{
+  err = FUJICALL_RV(FUJICMD_BASE64_ENCODE_LENGTH, len, sizeof(len))
+  return err;
+}
+
+bool fuji_base64_encode_output(char *s, uint16_t len) 
+{
+  err = FUJICALL_B12_RV(FUJICMD_BASE64_ENCODE_INPUT, length, s, len);
+  return err;
+}
+ */
