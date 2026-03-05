@@ -1,9 +1,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "fujinet-bus-msx.h"
+#include "fujinet-functions-platform.h"
 
 
-bool fuji_base64_decode_compute()
+bool fuji_base64_decode_compute(void);
 {
-    return fuji_base64_decode_compute();
+  err = FUJICALL(FUJICMD_BASE64_DECODE_COMPUTE);
+  return err;
 }
+
