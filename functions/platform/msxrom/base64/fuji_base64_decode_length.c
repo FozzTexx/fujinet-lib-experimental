@@ -4,8 +4,8 @@
 #include "fujinet-functions-platform.h"
 
 
-bool fuji_base64_decode_length(unsigned long *len);
+bool fuji_base64_decode_length(unsigned long *len)
 {
-  err = FUJICALL_RV(FUJICMD_BASE64_DECODE_LENGTH, len, sizeof(len))
+  bool err = FUJICALL_RV(FUJICMD_BASE64_DECODE_LENGTH, len, sizeof(len));
   return err;
 }

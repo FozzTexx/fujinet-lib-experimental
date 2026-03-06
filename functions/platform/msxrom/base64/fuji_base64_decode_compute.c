@@ -4,9 +4,9 @@
 #include "fujinet-functions-platform.h"
 
 
-bool fuji_base64_decode_compute(void);
+bool fuji_base64_encode_compute(void)
 {
-  err = FUJICALL(FUJICMD_BASE64_DECODE_COMPUTE);
+  bool err = FUJICALL(FUJICMD_BASE64_DECODE_COMPUTE);
   return err;
 }
 

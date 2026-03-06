@@ -4,8 +4,8 @@
 #include "fujinet-functions-platform.h"
 
 
-bool fuji_base64_decode_input(char *s, uint16_t len);
+bool fuji_base64_decode_input(char *s, uint16_t len)
 {
-  err = FUJICALL_B12_D(FUJICMD_BASE64_DECODE_INPUT, length, s, len);
+  bool err = FUJICALL_B12_D(FUJICMD_BASE64_DECODE_INPUT, length, s, len);
   return err;
 }
