@@ -6,6 +6,7 @@ DISK_TOOL_CREATE = dd
 DISK_TOOL_FORMAT = mformat
 DISK_TOOL_COPY = mcopy
 DISK_SIZE_KB = 360
+COMPILER = ow2
 
 MWD := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))..)
 include $(MWD)/common.mk

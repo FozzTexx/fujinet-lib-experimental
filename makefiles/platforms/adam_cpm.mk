@@ -2,6 +2,7 @@ EXECUTABLE = $(R2R_PD)/$(PRODUCT_BASE).com
 DISK = $(R2R_PD)/$(PRODUCT_BASE).dsk
 LIBRARY = $(R2R_PD)/$(PRODUCT_BASE).$(PLATFORM).lib
 DISK_TOOL = cpmcp
+COMPILER = z88dk
 
 MWD := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))..)
 include $(MWD)/common.mk

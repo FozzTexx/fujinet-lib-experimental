@@ -1,6 +1,7 @@
 EXECUTABLE = $(R2R_PD)/$(PRODUCT_BASE).ptp
 LIBRARY = $(R2R_PD)/$(PRODUCT_BASE).$(PLATFORM).lib
 AS_DEFAULT = zcc
+COMPILER = z88dk
 
 MWD := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))..)
 include $(MWD)/common.mk

@@ -1,5 +1,6 @@
 EXECUTABLE = $(R2R_PD)/$(PRODUCT_BASE).prg
 LIBRARY = $(R2R_PD)/$(PRODUCT_BASE).$(PLATFORM).lib
+COMPILER = cc65
 
 MWD := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))..)
 include $(MWD)/common.mk

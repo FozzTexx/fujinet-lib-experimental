@@ -4,6 +4,7 @@ LIBRARY = $(R2R_PD)/$(PRODUCT_BASE).$(PLATFORM).lib
 DISK_TOOL = ac
 DISK_TOOL_X = acx
 DISK_TOOL_INFO = https://github.com/AppleCommander/AppleCommander/releases/
+COMPILER = cc65
 
 MWD := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))..)
 include $(MWD)/common.mk
