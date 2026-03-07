@@ -1,7 +1,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "fujinet-bus-msx.h"
-#include "fujinet-functions-platform.h"
+#include "fujinet-fuji.h"
+#include "fujinet-commands.h"
 
 
 bool fuji_base64_decode_length(unsigned long *len)

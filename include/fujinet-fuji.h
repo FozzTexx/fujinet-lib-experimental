@@ -9,9 +9,7 @@
 #include "fujinet-bus.h"
 
 // Compile-specific functions
-#include "fujinet-functions-compiler.h"
-// Platform-specific functions
-#include "fujinet-functions-platform.h"
+#include "fujinet-compiler.h"
 
 // TODO: this header file needs more documentation
 
@@ -208,23 +206,36 @@ extern FNStatus _fuji_status;
 
 /**
  * @brief Closes the currently open directory
+ * COMMAND value: $F5
  * @return Success status, true if all OK.
  */
 #define fuji_close_directory() FUJICALL(FUJICMD_CLOSE_DIRECTORY)
 
 /**
  * @brief Copies a file from given src to dst, with supplied path in copy_spec
+ * COMMAND value: $D8
  * @return Success status, true if all OK.
  */
 #define fuji_copy_file(src_slot, dest_slot, copy_spec) FUJICALL_A1_A2_D(FUJICMD_COPY_FILE, src_slot, dest_slot, copy_spec, MAX_FILENAME_LEN)
 
 /**
  * @brief Creates a new disk from the given structure.
+ * COMMAND value: $E7
  * @return Success status, true if all OK.
  */
 #define fuji_create_new(new_disk) FUJICALL_D(FUJICMD_NEW_DISK, new_disk, sizeof(new_disk))
 
+/**
+ * @brief Disable the device.
+ * COMMAND value: $D4
+ * @return Unknown.
+ */
 #define fuji_disable_device(d) FUJICALL_A1(FUJICMD_DISABLE_DEVICE, d)
+/**
+ * @brief Enable the device.
+ * COMMAND value: $D5
+ * @return Unknown.
+ */
 #define fuji_enable_device(d) FUJICALL_A1(FUJICMD_ENABLE_DEVICE, d)
 
 // TODO: document and fix atari
@@ -245,6 +256,7 @@ bool fuji_enable_udpstream(uint16_t port, char *host);
 /**
  * @brief Gets adapter config information from FN, e.g. IP, MAC, BSSID etc.
  * Raw version that returns bytes for all IP etc related values.
+ * COMMAND value: $E8
  * @return Success status, true if all OK.
  */
 #define fuji_get_adapter_config(ac) FUJICALL_RV(FUJICMD_GET_ADAPTERCONFIG, ac, sizeof(AdapterConfig))
@@ -252,6 +264,7 @@ bool fuji_enable_udpstream(uint16_t port, char *host);
 /**
  * @brief Gets extended adapter config information from FN, e.g. IP, MAC, BSSID etc.
  * Extended version that returns strings in addition to raw for all IP etc related values.
+ * COMMAND value: $C4
  * @return Success status, true if all OK.
  */
 #define fuji_get_adapter_config_extended(ac) FUJICALL_RV(FUJICMD_GET_ADAPTERCONFIG_EXTENDED, ac, sizeof(AdapterConfigExtended))
@@ -267,6 +280,7 @@ bool fuji_get_device_enabled_status(uint8_t d);
 /**
  * @brief Sets the buffer to the device's filename in device id `ds`
  * Note: BUFFER MUST BE ABLE TO ACCEPT UP TO 256 BYTE STRING
+ * COMMAND value: $A0
  * @return Success status, true if all OK.
  */
 #define fuji_get_device_filename(ds, buffer) FUJICALL_RV(FUJICMD_GET_DEVICE1_FULLPATH + ds, buffer, MAX_FILENAME_LEN)
@@ -281,12 +295,14 @@ bool fuji_get_device_enabled_status(uint8_t d);
 
 /**
  * @brief Fetch the current directory position for paging through directories into pos.
+ * COMMAND value: $F2
  * @return success status of request
  */
 bool fuji_get_directory_position(uint16_t *pos);
 
 /**
  * @brief Fetch the host prefix for given host slot id.
+ * COMMAND value: $E0
  * @return success status of request
  */
 #define fuji_get_host_prefix(hs, prefix) FUJICALL_A1_RV(FUJICMD_GET_HOST_PREFIX, hs, prefix, MAX_FILENAME_LEN)
@@ -295,6 +311,7 @@ bool fuji_get_directory_position(uint16_t *pos);
  * @brief Sets ALL host slot information into pointer h.
  * `count` is the number of host slots, and the returned data size is checked against this multiple of HostSlot structs before copying.
  * If it doesn't match, no data is copied, and false is returned.
+ * COMMAND value: $F4
  * @return Success status, true if all OK.
  */
 #define fuji_get_host_slots(d, count) FUJICALL_RV(FUJICMD_READ_HOST_SLOTS, d, sizeof(HostSlot) * count)
@@ -302,6 +319,7 @@ bool fuji_get_directory_position(uint16_t *pos);
 /**
  * @brief Fills ssid_info with wifi scan results for bssid index n.
  * No data copied if there is an error.
+ * COMMAND value: $FC
  * @return Success status, true if all OK.
  */
 #define fuji_get_scan_result(n, ssid_info) FUJICALL_A1_RV(FUJICMD_GET_SCAN_RESULT, n, ssid_info, sizeof(SSIDInfo))
@@ -309,6 +327,7 @@ bool fuji_get_directory_position(uint16_t *pos);
 /**
  * @brief Fills net_config with current SSID/password values.
  * No data copied if there is an error.
+ * COMMAND value: $FC
  * @return Success status, true if all OK.
  */
 #define fuji_get_ssid(net_config) FUJICALL_RV(FUJICMD_GET_SSID, net_config, sizeof(NetConfig))

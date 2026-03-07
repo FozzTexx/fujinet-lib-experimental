@@ -1,7 +1,7 @@
 #include <conio.h>
-#include "fujinet-functions-compiler.h"
+#include "fujinet-compiler.h"
 
-void goto_x(unsigned char x)
+void fc_gotox(unsigned char x)
 {
     unsigned char y;
 
