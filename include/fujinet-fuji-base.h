@@ -1,5 +1,5 @@
-#ifndef FUJINET_FUJI_H
-#define FUJINET_FUJI_H
+#ifndef FUJINET_FUJI_BASE_H
+#define FUJINET_FUJI_BASE_H
 
 #include "fujinet-commands.h"
 #include "fujinet-const.h"

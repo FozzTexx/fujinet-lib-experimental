@@ -2,7 +2,7 @@
 #ifdef _CMOC_VERSION_
 #include <cmoc.h>
 #else /* ! _CMOC_VERSION_ */
-#include <string.h>
+#include "string.h"
 #endif /* _CMOC_VERSION_ */
 
 static char buffer[256];
