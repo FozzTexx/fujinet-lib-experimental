@@ -1,5 +1,5 @@
-#ifndef FUJINET_FUJI_H
-#define FUJINET_FUJI_H
+#ifndef FUJINET_FUJI_BASE_H
+#define FUJINET_FUJI_BASE_H
 
 #include "fujinet-commands.h"
 #include "fujinet-const.h"
@@ -104,17 +104,6 @@ typedef struct
 } DeviceSlot;
 
 // Disks have different structures / parameters
-
-#ifdef __ATARI__
-typedef struct
-{
-    uint16_t numSectors;
-    uint16_t sectorSize;
-    uint8_t hostSlot;
-    uint8_t deviceSlot;
-    char filename[256];
-} NewDisk;
-#endif
 
 #ifdef __MSDOS__
 typedef struct
@@ -289,6 +278,7 @@ bool fuji_get_device_enabled_status(uint8_t d);
  * @brief Sets ALL device slot information into pointer d.
  * `size` is the receiving array size, and the returned data size is checked against this before copying.
  * If it doesn't match, no data is copied, and false is returned.
+ * COMMAND value $3F
  * @return Success status, true if all OK.
  */
 #define fuji_get_device_slots(d, count) FUJICALL_RV(FUJICMD_READ_DEVICE_SLOTS, d, sizeof(DeviceSlot) * count)
@@ -327,13 +317,14 @@ bool fuji_get_directory_position(uint16_t *pos);
 /**
  * @brief Fills net_config with current SSID/password values.
  * No data copied if there is an error.
- * COMMAND value: $FC
+ * COMMAND value: $FE
  * @return Success status, true if all OK.
  */
 #define fuji_get_ssid(net_config) FUJICALL_RV(FUJICMD_GET_SSID, net_config, sizeof(NetConfig))
 
 /**
  * @brief Checks if WIFI is enabled or not. Any device errors will return false also.
+ * COMMAND value: $EA
  * @return enabled status 
  */
 bool fuji_get_wifi_enabled(void);
@@ -341,24 +332,28 @@ bool fuji_get_wifi_enabled(void);
 /**
  * @brief  Sets status to the wifi status value.
  * WL_CONNECTED (3), WL_DISCONNECTED (6) are set if there are no underyling errors in FN.
+ * COMMAND value: $FA
  * @return Success status, true if all OK.
  */
 #define fuji_get_wifi_status(status) FUJICALL_RV(FUJICMD_GET_WIFISTATUS, status, 1)
 
 /**
  * @brief Mount all devices
+ * COMMAND value: $D7
  * @return true if successful, false otherwise
  */
 #define fuji_mount_all() FUJICALL(FUJICMD_MOUNT_ALL)
 
 /**
  * @brief Mount specific device slot
+ * COMMAND value: $F8
  * @return true if successful, false otherwise
  */
 #define fuji_mount_disk_image(ds, mode) FUJICALL_A1_A2(FUJICMD_MOUNT_IMAGE, ds, mode)
 
 /**
  * @brief Mount specific host slot
+ * COMMAND value: $F9
  * @return true if successful, false otherwise
  */
 #define fuji_mount_host_slot(hs) FUJICALL_A1(FUJICMD_MOUNT_HOST, hs)
@@ -424,38 +419,14 @@ bool fuji_open_directory_filter(uint8_t hostSlot, const char *path, const char *
  * @brief Sends the device/host/mode information for devices to FN
  * @return success status of request.
  */
-#ifdef __ATARI__
-#define fuji_set_device_filename(mode, hs, ds, buffer) FUJICALL_A1_A2_D(FUJICMD_SET_DEVICE_FULLPATH, ds, (hs << 4) | (mode), buffer, MAX_FILENAME_LEN)
-#else /* !__ATARI__ */
 #define fuji_set_device_filename(mode, hs, ds, buffer) FUJICALL_A1_A2_A3_D(FUJICMD_SET_DEVICE_FULLPATH, ds, hs, mode, buffer, MAX_FILENAME_LEN)
-#endif /* __ATARI__ */
+
 
 /**
  * @brief Sets current directory position
  * @return success status of request.
  */
 #define fuji_set_directory_position(pos) FUJICALL_B12(FUJICMD_SET_DIRECTORY_POSITION, pos)
-
-#ifdef __ATARI__
-/**
- * @brief Fetch the current HSIO index value.
- * @return success status of request
- */
-bool fuji_get_hsio_index(uint8_t *index);
-
-/**
- * @brief Sets HSIO speed index
- * @return success status of request.
- */
-bool fuji_set_hsio_index(bool save, uint8_t index);
-
-/**
- * @brief Sets SIO external clock speed
- * @return success status of request.
- */
-bool fuji_set_sio_external_clock(uint16_t rate);
-
-#endif
 
 /**
  * @brief Set the host prefix for given host slot id for platforms that support it.

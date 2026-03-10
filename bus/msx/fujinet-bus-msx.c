@@ -6,7 +6,7 @@
 #include "fujinet-bus-msx.h"
 #include "fujinet-commands.h"
 #include "portio.h"
-#include <string.h>
+#include "string.h"
 
 #ifdef UNUSED
 #define COLUMNS 16
