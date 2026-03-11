@@ -41,6 +41,7 @@ static void hexdump(uint8_t *buffer, int count)
 }
 #endif /* UNUSED */
 
+#pragma codeseg code_fujibus
 
 #define milliseconds_to_jiffy(millis) ((millis) / (VDP_IS_PAL ? 20 : 1000 / 60))
 
@@ -304,6 +305,8 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 
   return true;
 }
+
+#pragma codeseg code_compiler
 
 uint16_t fuji_bus_read(uint8_t device, void *buffer, size_t length)
 {

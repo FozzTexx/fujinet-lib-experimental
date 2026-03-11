@@ -1,3 +1,5 @@
+	SECTION code_fujibus
+
 	public	timeout_init, timeout_check, timeout_cleanup
 
 ; ============================================================

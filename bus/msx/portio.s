@@ -1,3 +1,5 @@
+	SECTION code_fujibus
+
 	public	_port_getc, _port_getc_timeout, _port_discard_until
 	public	_port_getbuf, _port_get_until
 	public	_port_putc, _port_putbuf
