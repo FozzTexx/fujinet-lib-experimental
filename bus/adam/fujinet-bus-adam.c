@@ -1,7 +1,7 @@
 #include "fujinet-bus-adam.h"
 #include "fujinet-bus.h"
 #include "fujinet-commands.h"
-#include <string.h>
+#include "string.h"
 
 #include <stdio.h> // debug
 
