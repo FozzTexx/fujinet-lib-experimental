@@ -212,7 +212,7 @@ extern FNStatus _fuji_status;
  * COMMAND value: $E7
  * @return Success status, true if all OK.
  */
-#define fuji_create_new(new_disk) FUJICALL_D(FUJICMD_NEW_DISK, new_disk, sizeof(new_disk))
+#define fuji_create_new(new_disk) FUJICALL_D(FUJICMD_NEW_DISK, new_disk, sizeof(NewDisk))
 
 /**
  * @brief Disable the device.
