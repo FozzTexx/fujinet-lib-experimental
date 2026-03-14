@@ -2,7 +2,7 @@
 #include "fujinet-commands.h"
 #include "fujinet-network.h"
 #include "fujinet-err.h"
-#include "string.h"
+#include <string.h>
 
 #include <stdio.h> // debug
 

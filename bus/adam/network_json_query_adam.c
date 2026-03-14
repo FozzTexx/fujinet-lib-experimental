@@ -1,5 +1,5 @@
 #include <fujinet-network.h>
-#include "string.h"
+#include <string.h>
 
 #define MAX_ADAM_PACKET_REPLY 1024
 

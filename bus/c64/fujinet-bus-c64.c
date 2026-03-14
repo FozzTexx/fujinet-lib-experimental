@@ -1,6 +1,6 @@
 #include "fujinet-fuji.h"
 #include "fujinet-cbm.h"
-#include "string.h"
+#include <string.h>
 
 #include <stdio.h> // debug
 

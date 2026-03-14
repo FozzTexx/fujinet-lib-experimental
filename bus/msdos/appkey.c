@@ -2,7 +2,7 @@
 #include "fujinet-int.h"
 #include "fujinet-bus.h"
 #include "fujinet-commands.h"
-#include "string.h"
+#include <string.h>
 
 typedef struct {
   uint16_t length;
