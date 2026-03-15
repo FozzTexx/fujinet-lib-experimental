@@ -8,6 +8,8 @@
 // Many fuji_ functions are just macros to the bus call so we need to include this
 #include "fujinet-bus.h"
 
+#include "fujinet-compiler.h"
+
 // TODO: this header file needs more documentation
 
 // In general, bools return the "success" status, so true is good, false is bad.

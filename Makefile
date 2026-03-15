@@ -11,7 +11,7 @@ PLATFORMS += adam
 
 # SRC_DIRS may use the literal %PLATFORM% token.
 # It expands to the chosen PLATFORM plus any of its combos.
-SRC_DIRS = common bus/%PLATFORM% code/platforms/%PLATFORM%/** code/compilers/$(COMPILER)/base code/compilers/%PLATFORM%/**
+SRC_DIRS = common bus/%PLATFORM% code/platforms/%PLATFORM%/** code/compilers/$(COMPILER)/common/** code/compilers/$(COMPILER)/%PLATFORM%/**
 INCLUDE_DIRS = include include/%PLATFORM% bus/%PLATFORM%/include code/platforms/%PLATFORM%/**/include code/compilers/$(COMPILER)/include
 CFLAGS = -DBUILD_$(PLATFORM_UC)
 
