@@ -9,6 +9,7 @@
 
 char _lynx_packet[1024];
 uint16_t _lynx_len;
+uint16_t _comlynx_init = 0;
 
 
 // fields, aux3, aux4 only used with other systems, not
@@ -19,8 +20,15 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 		   void *reply, size_t reply_length)
 {
   uint8_t r;
-  uint8_t num_bytes;
+  uint8_t numbytes;
 
+
+  // Is Comlynx initialized?
+  if (_comlynx_init) {
+    r = fnio_init();
+    if (!r)
+      return(false);
+  }
 
   // Reset our data length counter
   _lynx_len = 0;
@@ -50,8 +58,8 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 
   // Add data if it exists
   if (data) {
-    memcpy(&_lynx_packet[_lynx_len], data, data_len);
-    lynx_len += data_len;
+    memcpy(&_lynx_packet[_lynx_len], data, data_length);
+    _lynx_len += data_length;
   }
 
   // Send the command (and data)

@@ -12,13 +12,13 @@
 #define FUJI_DEVICEID_DISK              0x31
 #define FUJI_DEVICEID_DISK_LAST         0x3F
 #define FUJI_DEVICEID_MIDI              0x99
-#define FUJI_DEVICEID_NETWORK		0x71
-#define FUJI_DEVICEID_NETWORK_LAST	0x78
+#define FUJI_DEVICEID_NETWORK		        0x71
+#define FUJI_DEVICEID_NETWORK_LAST	    0x78
 #define FUJI_DEVICEID_PRINTER           0x40
 #define FUJI_DEVICEID_PRINTER_LAST      0x43
 #define FUJI_DEVICEID_SERIAL            0x50
 #define FUJI_DEVICEID_SERIAL_LAST       0x53
-#define FUJI_DEVICEID_VOICE		0x43
+#define FUJI_DEVICEID_VOICE		          0x43
 
 enum {
   FUJI_FIELD_NONE        = 0,
