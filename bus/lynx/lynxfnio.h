@@ -12,17 +12,17 @@
 #define LYNX_TIMEOUT          10
 
 enum FNIO_ERROR_T {
-	FNIO_ERR_NONE,					  // success
-	FNIO_ERR_TIMEOUT,				  // timed out waiting for data
-	FNIO_ERR_SEND_CHK,				// checksum on our sent data was bad
-	FNIO_ERR_RECV_CHK,				// checksum on received data was bad
-  FNIO_ERR_NO_DATA,         // no data received
-  FNIO_ERR_CMD_FAILED,      // command failed on Fujinet side
-	FNIO_ERR_GENERAL				  // undefined error
+	FNIO_ERR_NONE,			  	// success
+	FNIO_ERR_TIMEOUT,			// timed out waiting for data
+	FNIO_ERR_SEND_CHK,			// checksum on our sent data was bad
+	FNIO_ERR_RECV_CHK,			// checksum on received data was bad
+  	FNIO_ERR_NO_DATA,         	// no data received
+  	FNIO_ERR_CMD_FAILED,      	// command failed on Fujinet side
+	FNIO_ERR_GENERAL			// undefined error
 };
 
 // Some globals to help with code size/speed (could be moved to zero page)
-extern unsigned char _ck;			// checksum byte
+extern unsigned char _ck;				// checksum byte
 extern char _r;						    // response/data from FN
 extern unsigned char _fn_error;
 
