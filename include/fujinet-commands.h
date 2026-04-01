@@ -82,6 +82,8 @@ enum {
   FUJICMD_SEEK                          = 0x25,
   FUJICMD_DELETE                        = 0x21,
   FUJICMD_RENAME                        = 0x20,
+  FUJICMD_NAK                           = 0x15, // ASCII NAK
+  FUJICMD_ACK                           = 0x06, // ASCII ACK
 };
 
 #endif /* FUJINET_COMMAND_H */
