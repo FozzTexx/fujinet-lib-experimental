@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include "lynxfnio.h"
+#include "fujinet-commands.h"
 
 
 
@@ -25,14 +26,10 @@
 unsigned char _ck;			  // checksum byte
 char _r;               		// response/data from FN
 unsigned char _fn_error;	// error status
-unsigned char _retries; 
-unsigned char _timeout;
 
 
 unsigned char fnio_init(void)
-{
-  unsigned char r;
-  
+{ 
   struct ser_params params = {
     SER_BAUD_62500,
     SER_BITS_8,
@@ -44,56 +41,14 @@ unsigned char fnio_init(void)
   ser_install(lynx_comlynx_ser); // This will activate the ComLynx
   CLI();
 
-  // set default retries and timeout values
-  _retries = DEF_RETRIES;
-  _timeout = DEF_TIMEOUT;
-
   // do open
-  r = ser_open(&params);
-
-  // send a break
-  _send_break();
-  return(r);
+  return(ser_open(&params));
 }
 
 
 unsigned char fnio_done(void)
 {
   return ser_close();
-}
-
-
-/* crude delay tuned for ~62500 baud */
-void _break_delay(void) {
-  unsigned int i;
-
-    /* ~600 µs target (well above 384 µs minimum) */
-    for (i = 0; i < 2000; ++i) {
-      __asm__("nop");
-    }
-}
-
-
-/**
- * @brief send a break to Fujinet to tell it to clear all buffers
- * just in case FN is waiting for data still
-  */
-void _send_break()
-{
-  #define SERCTL (*(volatile unsigned char*)0xFD8C)
-  #define SERCTL_TXBRK 0x02   /* bit 1 = TX break */
-  #define SERCTL_RESETERR 0x0
-
-  /* 1. Start break (forces TX low) */
-  SERCTL |= SERCTL_TXBRK;
-
-  /* 2. Hold long enough (>= 24 bit times) */
-  _break_delay();
-
-  /* 3. End break */
-  SERCTL &= ~SERCTL_TXBRK;
-  SERCTL |= SERCTL_RESETERR;
-  fnio_flush_recv();
 }
 
 
@@ -128,7 +83,7 @@ unsigned char _serial_get_loop(void)
   start = clock();
   while (ser_get(&_r) == SER_ERR_NO_DATA) {
     now = clock();
-    if (((now - start) / CLOCKS_PER_SEC) > _timeout) {
+    if (((now - start) / CLOCKS_PER_SEC) > LYNX_TIMEOUT) {
       _fn_error = FNIO_ERR_TIMEOUT;
       return(0);
     }
@@ -278,10 +233,4 @@ unsigned char fnio_recv_ack(void)
 unsigned char fnio_error()
 {
   return(_fn_error);
-}
-
-void fnio_set_retry(unsigned retries, unsigned timeout)
-{
-  _retries = retries;
-  _timeout = timeout;
 }
