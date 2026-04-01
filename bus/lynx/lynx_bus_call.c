@@ -24,10 +24,10 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 
 
   // Is Comlynx initialized?
-  if (_comlynx_init) {
-    r = fnio_init();
-    if (!r)
+  if (!_comlynx_init) {
+    if (!fnio_init())
       return(false);
+    _comlynx_init = 1;
   }
 
   // Reset our data length counter
