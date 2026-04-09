@@ -1,9 +1,8 @@
 #include "fujinet-bus-msx.h"
 #include "fujinet-commands.h"
-//#include "unapi/asm.h"
 
 #undef HEXDUMP
-#ifdef HEXDUMP
+#if defined(DEBUG) || defined(HEXDUMP)
 #define COLUMNS 16
 
 static void hexdump(uint8_t *buffer, int count)
@@ -50,9 +49,11 @@ typedef struct {
   uint16_t length;
 } FujiNetParams;
 
-#define FUJI_CALL_NONE   1
-#define FUJI_CALL_WRITE  2
-#define FUJI_CALL_READ   3
+enum {
+  FUJI_CALL_INFO = 0,
+  FUJI_CALL_WRITE,
+  FUJI_CALL_READ,
+};
 
 //***************
 
@@ -85,24 +86,6 @@ static uint8_t UNAPIGetCount(const char *service)
   return unapi_count;
 }
 
-#if 0
-static void UNAPIGetSlot(uint8_t index)
-{
-  // EXTBIO: DE=$2222, A=index (1..count), B=1 -> Get Info
-  // Returns: A=Slot ID, HL=Entry Point, etc.
-  __asm
-    ld   de, 0x2222
-    ld   a, (ix+4)   // index
-    ld   b, 1        // Function 1: Get Sliver Info
-    call 0xFFCA      // EXTBIO
-
-    // A now contains the Slot ID in MSX format (FSSS PPPP)
-    ld   (_unapi_slot), a
-    __endasm;
-
-  return;
-}
-#else
 static void UNAPIGetSlot(uint8_t index)
 {
   // A=index, B=1, DE=0x2222 -> EXTBIO (0xFFCA)
@@ -129,7 +112,6 @@ static void UNAPIGetSlot(uint8_t index)
     pop  ix
     __endasm;
 }
-#endif
 
 static uint8_t  call_func;
 static void* call_arg;
@@ -138,7 +120,7 @@ static uint16_t UNAPICall(uint8_t func, void *arg)
 {
   call_func = func;
   call_arg = arg;
-  
+
   __asm
     push ix
     push iy
@@ -238,15 +220,6 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
   printf("OUT PARAMS: 0x%04x\n", &params);
 #endif
 
-  if (data) {
-    params.buffer = data;
-    params.length = data_length;
-#ifdef DEBUG
-    printf("FUJINET WRITE %d\n", params.length);
-#endif
-    return UNAPICall(FUJI_CALL_WRITE, &params);
-  }
-
   if (reply) {
     params.buffer = reply;
     params.length = reply_length;
@@ -257,10 +230,12 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
     return UNAPICall(FUJI_CALL_READ, &params);
   }
 
+  params.buffer = data;
+  params.length = data_length;
 #ifdef DEBUG
-  printf("FUJINET NONE\n");
+  printf("FUJINET WRITE %d\n", params.length);
 #endif
-  return UNAPICall(FUJI_CALL_NONE, &params);
+  return UNAPICall(FUJI_CALL_WRITE, &params);
 }
 
 uint16_t fuji_bus_read(uint8_t device, void *buffer, size_t length)
