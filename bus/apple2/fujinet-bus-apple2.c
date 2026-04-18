@@ -95,13 +95,13 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
       sp_control(sp_id, fuji_cmd);
   }
 
-  if (!sp_error && is_status) {
+  if (is_status) {
     if (sp_id == sp_network)
       sp_status_nw(sp_id, fuji_cmd);
     else
       sp_status(sp_id, fuji_cmd);
     if (!sp_error && reply)
-      memcpy(reply, &sp_payload[0], reply_length);
+      memcpy(reply, &sp_payload[0], sp_count);
   }
 
   fn_device_error = fn_error(sp_error);
