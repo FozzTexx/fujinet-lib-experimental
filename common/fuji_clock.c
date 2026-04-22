@@ -18,21 +18,21 @@ extern const uint8_t *clk_cmd;
 static uint8_t clock_set_alternate_tz(const char *tz)
 {
   size_t len = strlen(tz) + 1;
-  return CLKCALL_B12_D(FUJICMD_APETIME_SETTZ, len, tz, len) ? FN_ERR_OK : FN_ERR_IO_ERROR;
+  return CLKCALL_B12_D(APETIMECMD_SETTZ, len, tz, len) ? FN_ERR_OK : FN_ERR_IO_ERROR;
 }
 
 uint8_t clock_set_tz(const char *tz)
 {
   size_t len = strlen(tz) + 1;
-  return CLKCALL_B12_D('t', len, tz, len) ? FN_ERR_OK : FN_ERR_IO_ERROR;
+  return CLKCALL_B12_D(APETIMECMD_SETTZ_ALT, len, tz, len) ? FN_ERR_OK : FN_ERR_IO_ERROR;
 }
 
 uint8_t clock_get_tz(char *tz)
 {
   uint8_t len;
-  if (!CLKCALL_RV('L', &len, 1))
+  if (!CLKCALL_RV(APETIMECMD_GETTZ_LEN, &len, 1))
     return FN_ERR_IO_ERROR;
-  return CLKCALL_RV('G', tz, len) ? FN_ERR_OK : FN_ERR_IO_ERROR;
+  return CLKCALL_RV(APETIMECMD_GET_GENERAL, tz, len) ? FN_ERR_OK : FN_ERR_IO_ERROR;
 }
 
 uint8_t clock_get_time(uint8_t *time_data, TimeFormat format)
