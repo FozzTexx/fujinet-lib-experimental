@@ -97,7 +97,12 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
   if (device != FUJI_DEVICEID_CLOCK && device != FUJI_DEVICEID_FUJINET)
     return false;
 
-  fb_packet = (uint8_t *)sbrk(0);
+  // Use sbrk(0) to get pointer to unused memory at top of program. No
+  // need to move the sbrk() since we only need this space temporarily
+  // and nothing else will call sbrk() to try to use this space. Since
+  // we don't allocate it we also don't need to free it. Probably
+  // unsafe.
+  fb_packet = (uint8_t *) sbrk(0);
 
   if (device == FUJI_DEVICEID_CLOCK)
     fb_header.opcode = OP_CLOCK;
@@ -109,7 +114,7 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
   idx = pack_payload(fb_packet, fields, aux1, aux2, aux3, aux4, data, data_length);
 
   bus_ready();
-  dwwrite((unsigned char *)&fb_header, sizeof(fb_header));
+  dwwrite((unsigned char *) &fb_header, sizeof(fb_header));
   if (idx)
     dwwrite(fb_packet, idx);
 
