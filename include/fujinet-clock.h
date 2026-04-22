@@ -10,11 +10,12 @@
 #include <fujinet-err.h>
 #include <fujinet-bus.h>
 #include <fujinet-bus-ezclk.h>
+#include <fujinet-commands.h>
 
 /*
  * If additional formats are added, do not change the current order of enums.
- * The numeric values are used as indices into platform-specific command tables
- * inside the implementation.
+ * The numeric values are used as indices into the command table in the
+ * implementation. Keep TIMEFORMAT_COUNT in sync with the enum.
  */
 typedef enum time_format_t {
     SIMPLE_BINARY,      /* 7 bytes: Y(century), Y(hundreds), M, D, H, M, S */
@@ -24,6 +25,19 @@ typedef enum time_format_t {
     UTC_ISO_STRING,     /* ISO string in UTC, null terminated */
     APPLE3_SOS_BINARY   /* Apple3 SOS string: YYYYMMDD0HHMMSS000, null terminated */
 } TimeFormat;
+
+#define TIMEFORMAT_COUNT 6
+
+#define CLK_CMD_SIMPLE_BINARY      APETIMECMD_SETTZ_ALT2
+#define CLK_CMD_PRODOS_BINARY      APETIMECMD_GET_PRODOS
+#ifdef BUILD_APPLE2
+#define CLK_CMD_APETIME_BINARY     APETIMECMD_GET_ATARI
+#else
+#define CLK_CMD_APETIME_BINARY     APETIMECMD_GETTIME
+#endif
+#define CLK_CMD_TZ_ISO_STRING      APETIMECMD_GET_ISO_LOCAL
+#define CLK_CMD_UTC_ISO_STRING     APETIMECMD_GET_ISO_UTC
+#define CLK_CMD_APPLE3_SOS_BINARY  APETIMECMD_GET_SOS
 
 /**
  * @brief  Set the FN clock's system timezone

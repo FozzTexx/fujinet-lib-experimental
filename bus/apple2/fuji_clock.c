@@ -1,10 +1,8 @@
 #include "fujinet-clock.h"
-#include "fujinet-commands.h"
 
 #include <string.h>
 #include <ctype.h>
 
-#define TIMEFORMAT_COUNT        6
 #define CLK_ALTIFYERIZE(cmd) tolower(cmd)
 
 static const uint8_t clk_reply_len[TIMEFORMAT_COUNT] = { 7, 4, 6, 25, 25, 19 };
