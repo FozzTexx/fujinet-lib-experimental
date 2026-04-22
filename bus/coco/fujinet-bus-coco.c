@@ -98,6 +98,29 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
     return fuji_net_call(device - FUJI_DEVICEID_NETWORK + 1, fuji_cmd, fields,
                          aux1, aux2, aux3, aux4, data, data_length, reply, reply_length);
 
+  if (device == FUJI_DEVICEID_CLOCK) {
+    fb_packet = (uint8_t *) sbrk(0);
+    fb_packet[0] = OP_CLOCK;
+    fb_packet[1] = fuji_cmd;
+    idx = 2;
+    numbytes = fuji_field_numbytes(fields);
+    if (numbytes) { fb_packet[idx++] = aux1; numbytes--; }
+    if (numbytes) { fb_packet[idx++] = aux2; numbytes--; }
+    if (numbytes) { fb_packet[idx++] = aux3; numbytes--; }
+    if (numbytes) { fb_packet[idx++] = aux4; numbytes--; }
+    if (data) {
+      memcpy(&fb_packet[idx], data, data_length);
+      idx += data_length;
+    }
+
+    bus_ready();
+    dwwrite(fb_packet, idx);
+
+    if (reply)
+      return dwread((byte *) reply, reply_length) ? true : false;
+    return true;
+  }
+
   if (device != FUJI_DEVICEID_FUJINET)
     return false;
 
