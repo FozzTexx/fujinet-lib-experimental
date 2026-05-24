@@ -4,7 +4,7 @@ PRODUCT = flibtest
 # It expands to the chosen PLATFORM plus any of its combos.
 SRC_DIRS = src src/%PLATFORM%
 MEKKO_CONFIG = fuji.mk
-CFLAGS = -DFUJI_TESTS=1
+CFLAGS += -DFUJI_TESTS=1
 
 include linkbin.mk
 include shared.mk

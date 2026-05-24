@@ -44,7 +44,7 @@ PLATFORM_COMBOS = \
 
 include ../makefiles/toplevel-rules.mk
 
-CFLAGS = -DBUILD_$(PLATFORM_UC)
+CFLAGS += -DBUILD_$(PLATFORM_UC)
 
 # If you need to add extra platform-specific steps, do it below:
 #   coco/r2r:: coco/custom-step1

@@ -262,12 +262,6 @@ void test_network_json(void)
   err = network_open(NET_JSON_URL, OPEN_MODE_HTTP_GET, OPEN_TRANS_NONE);
   TEST("network_open for JSON succeeds", err == FN_ERR_OK);
 
-#ifdef FN_BROKEN_network_read
-  SKIP(network_read);
-#endif
-  memset(g.net, 0, sizeof(g.net));
-  network_read(NET_JSON_URL, g.net, sizeof(g.net));
-
 #ifdef FN_BROKEN_network_json_parse
   SKIP(network_json_parse);
 #endif

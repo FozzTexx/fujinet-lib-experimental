@@ -4,7 +4,7 @@ PRODUCT = fclktest
 # It expands to the chosen PLATFORM plus any of its combos.
 SRC_DIRS = src src/%PLATFORM%
 MEKKO_CONFIG = clock.mk
-CFLAGS = -DCLOCK_TESTS=1
+CFLAGS += -DCLOCK_TESTS=1
 
 include linkbin.mk
 include shared.mk

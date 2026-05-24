@@ -20,9 +20,9 @@
  *   - Stack locals are kept under 64 bytes; anything larger is a static global
  */
 
-#define FUJI_TESTS 1
-#define NETWORK_TESTS 0
-#define CLOCK_TESTS 0
+#if !FUJI_TESTS && !NETWORK_TESTS && !CLOCK_TESTS
+#error "You need to choose some tests"
+#endif
 
 #include "fuji.h"
 #include "network.h"
@@ -71,18 +71,16 @@ int main(void)
 #if FUJI_TESTS
   /* fuji.h */
   test_fuji_status();
-  test_fuji_wifi();
+  test_fuji_directory_ops();
   test_fuji_adapter_config();
+  test_fuji_wifi();
   test_fuji_network_scan();
   test_fuji_guid();
   test_fuji_host_device_slots();
   test_fuji_host_prefix();
   test_fuji_appkey();
   test_fuji_base64();
-#ifndef BUILD_APPLE2
   test_fuji_hashing();
-#endif // BUILD_APPLE2
-  test_fuji_directory_ops();
 #endif // FUJI_TESTS
 
 #if NETWORK_TESTS
