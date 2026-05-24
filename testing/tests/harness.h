@@ -1,3 +1,6 @@
+#ifndef HARNESS_H
+#define HARNESS_H
+
 #define TEST(name, expr)                                        \
     do {                                                        \
       tests_run++;                                              \
@@ -35,3 +38,5 @@ extern int tests_run, tests_passed, tests_skipped, tests_failed;
 
 extern void end_testing(int code);
 extern void test_abort(void);
+
+#endif /* HARNESS_H */

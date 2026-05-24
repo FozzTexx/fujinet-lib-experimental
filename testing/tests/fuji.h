@@ -1,3 +1,6 @@
+#ifndef FUJI_H
+#define FUJI_H
+
 extern void test_fuji_status(void);
 extern void test_fuji_wifi(void);
 extern void test_fuji_adapter_config(void);
@@ -9,3 +12,5 @@ extern void test_fuji_appkey(void);
 extern void test_fuji_base64(void);
 extern void test_fuji_hashing(void);
 extern void test_fuji_directory_ops(void);
+
+#endif /* FUJI_H */

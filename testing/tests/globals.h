@@ -1,3 +1,6 @@
+#ifndef GLOBALS_H
+#define GLOBALS_H
+
 /* =========================================================================
  * Large buffers as globals (avoids blowing the stack)
  * ========================================================================= */
@@ -79,3 +82,5 @@ typedef union {
 } buf_union;
 
 extern buf_union g;
+
+#endif /* GLOBALS_H */

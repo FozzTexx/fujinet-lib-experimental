@@ -1,3 +1,6 @@
+#ifndef NETWORK_H
+#define NETWORK_H
+
 extern void test_network_init(void);
 extern void test_network_http_get(void);
 extern void test_network_http_get_nonblocking(void);
@@ -9,3 +12,5 @@ extern void test_network_http_put_delete(void);
 extern void test_network_write(void);
 extern void test_network_unit(void);
 extern void test_network_error_path(void);
+
+#endif /* NETWORK_H */

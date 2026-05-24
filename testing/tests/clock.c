@@ -181,7 +181,7 @@ void test_clock_apple3_sos(void)
   err = clock_get_time(g.clock_fmt, APPLE3_SOS_BINARY);
   TEST("clock_get_time(APPLE3_SOS_BINARY) returns FN_ERR_OK", err == FN_ERR_OK);
   print_hex("APPLE3_SOS", g.clock_fmt, 18);
-  TEST("APPLE3_SOS reserved byte[8] is 0", g.clock_fmt[8] == 0);
+  TEST("APPLE3_SOS reserved byte[8] is 0", g.clock_fmt[8] == '0');
 #endif
 
   END_OF_TEST();
