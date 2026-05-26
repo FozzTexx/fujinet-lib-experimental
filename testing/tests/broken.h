@@ -36,6 +36,22 @@
 #define FN_BROKEN_clock_get_time_tz
 #endif /* BUILD_COCO */
 
+#ifdef BUILD_APPLE2
+#define FN_BROKEN_fuji_open_directory2
+#define FN_BROKEN_fuji_get_device_slots
+#define FN_BROKEN_fuji_get_host_prefix
+
+#define FN_BROKEN_fuji_hash_clear
+#define FN_BROKEN_fuji_hash_data
+#define FN_BROKEN_fuji_hash_calculate
+
+#define FN_BROKEN_network_http_post
+
+// Missing from firmware
+#define FN_BROKEN_fuji_base64_encode_input
+
+#endif /* BUILD_APPLE2 */
+
 #else /* FNLIB_VERSION_MAJOR >= 5 */
 #endif /* FNLIB_VERSION_MAJOR */
 
