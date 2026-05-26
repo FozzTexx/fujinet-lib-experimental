@@ -13,6 +13,8 @@
  *   #define FN_BROKEN_network_http_put
  * ========================================================================= */
 
+#include <fujinet-fuji.h>
+
 #if FNLIB_VERSION_MAJOR < 5
 
 #ifdef BUILD_ATARI
@@ -38,7 +40,6 @@
 
 #ifdef BUILD_APPLE2
 #define FN_BROKEN_fuji_open_directory2
-#define FN_BROKEN_fuji_get_device_slots
 #define FN_BROKEN_fuji_get_host_prefix
 
 #define FN_BROKEN_fuji_hash_clear

@@ -35,6 +35,8 @@
  *   dir          -- directory path/filter buffer (258 bytes)
  */
 
+#include "constants.h"
+
 typedef union {
   uint8_t net[512];
 
@@ -44,9 +46,9 @@ typedef union {
   } adapter;
 
   struct {
-    HostSlot   hosts[8];
-    HostSlot   hosts2[8];
-    DeviceSlot devices[8];
+    HostSlot   hosts[MAX_HOSTS];
+    HostSlot   hosts2[MAX_HOSTS];
+    DeviceSlot devices[MAX_DISKS];
   } slots;
 
   struct {
