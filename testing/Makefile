@@ -7,7 +7,7 @@ all: $(SUBPROJECTS)
 $(SUBPROJECTS):
 	$(MAKE) -f $@.mk $(PLATFORM)
 
-atari apple2 coco:
+atari apple2 coco msdos:
 	$(MAKE) PLATFORM=$@ all
 
 clean:

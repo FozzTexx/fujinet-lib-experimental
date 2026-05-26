@@ -77,8 +77,8 @@ int main(void)
   test_fuji_directory_ops();
   test_fuji_wifi();
   test_fuji_network_scan();
-  test_fuji_guid();
   test_fuji_appkey();
+  test_fuji_guid();
   test_fuji_base64();
   test_fuji_hashing();
 #endif // FUJI_TESTS

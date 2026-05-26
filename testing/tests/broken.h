@@ -52,6 +52,37 @@
 
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_MSDOS
+#define FN_BROKEN_fuji_get_host_slots
+#define FN_BROKEN_fuji_get_host_prefix
+#define FN_BROKEN_fuji_mount_host_slot
+#define FN_BROKEN_fuji_get_scan_result
+
+#define FN_BROKEN_fuji_read_appkey
+
+#define FN_BROKEN_fuji_base64_encode_input
+#define FN_BROKEN_fuji_hash_data
+
+#define FN_BROKEN_clock_get_time_SIMPLE_BINARY
+#define FN_BROKEN_clock_get_time_PRODOS_BINARY
+#define FN_BROKEN_clock_get_time_APETIME_BINARY
+#define FN_BROKEN_clock_get_time_TZ_ISO_STRING
+#define FN_BROKEN_clock_get_time_UTC_ISO_STRING
+#define FN_BROKEN_clock_get_time_APPLE3_SOS_BINARY
+#define FN_BROKEN_clock_get_tz
+#define FN_BROKEN_clock_set_tz
+#define FN_BROKEN_clock_get_time_tz
+
+#define FN_BROKEN_network_write
+#define FN_BROKEN_network_read
+#define FN_BROKEN_network_http_post
+#define FN_BROKEN_network_http_start_add_headers
+#define FN_BROKEN_network_http_set_channel_mode
+#define FN_BROKEN_network_json_parse
+#define FN_BROKEN_network_http_put
+
+#endif /* BUILD_MSDOS */
+
 #else /* FNLIB_VERSION_MAJOR >= 5 */
 #endif /* FNLIB_VERSION_MAJOR */
 
