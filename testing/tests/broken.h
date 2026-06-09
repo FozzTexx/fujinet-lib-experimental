@@ -116,6 +116,8 @@
 #endif /* BUILD_ADAM */
 
 #ifdef BUILD_C64
+#define FN_BROKEN_fuji_generate_guid
+
 #define FN_BROKEN_clock_get_time_SIMPLE_BINARY
 #define FN_BROKEN_clock_get_time_PRODOS_BINARY
 #define FN_BROKEN_clock_get_time_APETIME_BINARY
@@ -137,8 +139,8 @@
 
 #ifdef BUILD_APPLE2
 // Missing from firmware
-#define FN_BROKEN_fuji_base64_encode_input
-#define FN_BROKEN_fuji_hash_data
+//#define FN_BROKEN_fuji_base64_encode_input
+//#define FN_BROKEN_fuji_hash_data
 #endif /* BUILD_APPLE2 */
 
 #endif /* FNLIB_VERSION_MAJOR */
