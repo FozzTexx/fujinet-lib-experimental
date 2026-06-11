@@ -454,7 +454,11 @@ bool fuji_set_sio_external_clock(uint16_t rate);
  * @return success status of the status request
  * NOTE: The actual status VALUE is in 'status', the return is just whether the command to fetch the status succeeded, it could succeed, but the status value holds an error.
  */
+#ifdef __CBM__
+#define fuji_status(status) FUJICALL_RV(FUJICMD_STATUS, status, sizeof(FNStatus))
+#else
 #define fuji_status(status) FUJICALL_A1_RV(FUJICMD_STATUS, 0, status, sizeof(FNStatus))
+#endif
 
 #ifdef __CBM__
 // DEBUGGING

@@ -79,13 +79,17 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
   }
 
   if (success && reply) {
-    rlen = cbm_read(CBM_CMD_CHANNEL, reply, reply_length);
-    if (rlen != reply_length)
+    rlen = cbm_read(cbm_chan, reply, reply_length);
+#if 0
+    if (rlen != reply_length) {
+      printf("BAD REPLY LEN %d  EXP %d\n", rlen, reply_length);
       success = false;
+    }
+#endif
   }
 
   // FIXME - does it matter if we don't bother to close it?
-  cbm_close(CBM_CMD_CHANNEL);
+  cbm_close(cbm_chan);
 
   return success;
 }
