@@ -1,6 +1,7 @@
 #include "fujinet-fuji.h"
 #include "fujinet-cbm.h"
 #include <string.h>
+#include <cbm.h>
 
 #include <stdio.h> // debug
 
@@ -11,8 +12,7 @@ typedef struct {
 } fujibus_packet;
 
 static fujibus_packet fb_packet;
-
-//uint8_t fn_device_error;
+FNStatus _fuji_status;
 
 #if 0
 bool fuji_net_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
@@ -22,6 +22,20 @@ bool fuji_net_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 {
 }
 #endif
+
+bool fuji_was_error(uint8_t cbm_chan)
+{
+  const uint8_t fuji_status_cmd[] = {0x01, FUJICMD_STATUS};
+  int len;
+
+
+  len = cbm_write(cbm_chan, fuji_status_cmd, sizeof(fuji_status_cmd));
+  if (len != 2)
+    return true;
+
+  len = cbm_read(cbm_chan, &_fuji_status, sizeof(_fuji_status));
+  return _fuji_status.value.error != 0;
+}
 
 bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 		   uint8_t aux1, uint8_t aux2, uint8_t aux3, uint8_t aux4,
@@ -76,6 +90,8 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
     wlen = cbm_write(cbm_chan, fb_packet.data, idx);
     if (wlen != idx)
       success = false;
+    if (success && !reply && fuji_was_error(cbm_chan))
+      success = false;
   }
 
   if (success && reply) {
@@ -88,7 +104,6 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 #endif
   }
 
-  // FIXME - does it matter if we don't bother to close it?
   cbm_close(cbm_chan);
 
   return success;
@@ -117,11 +132,16 @@ uint16_t fuji_bus_write(uint8_t device, const void *buffer, size_t length)
 
 bool fuji_bus_appkey_read(void *string, uint16_t *length)
 {
-  uint16_t rlen;
+  const uint8_t fuji_read_cmd[] = {0x01, FUJICMD_READ_APPKEY};
+  uint16_t len;
 
 
-  rlen = cbm_read(CBM_CMD_CHANNEL, string, MAX_APPKEY_LEN);
-  *length = rlen;
+  if (fuji_cbm_open(CBM_CMD_CHANNEL, CBM_DEV_FUJI, CBM_CMD_CHANNEL,
+                    sizeof(fuji_read_cmd), (unsigned char *) &fuji_read_cmd) != 0)
+    return false;
+  len = cbm_read(CBM_CMD_CHANNEL, string, MAX_APPKEY_LEN);
+  *length = len;
+  cbm_close(CBM_CMD_CHANNEL);
   return true;
 }
 

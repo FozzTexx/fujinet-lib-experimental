@@ -522,7 +522,11 @@ void fuji_set_appkey_details(uint16_t creator_id, uint8_t app_id, enum AppKeySiz
 // All return success status (true = worked)
 #define fuji_hash_compute(type) FUJICALL_A1(FUJICMD_HASH_COMPUTE, type)
 #define fuji_hash_compute_no_clear(type) FUJICALL_A1(FUJICMD_HASH_COMPUTE_NO_CLEAR, type)
+#ifdef __CBM__
+#define fuji_hash_input(data, len) FUJICALL_D(FUJICMD_HASH_INPUT, data, len)
+#else
 #define fuji_hash_input(data, len) FUJICALL_B12_D(FUJICMD_HASH_INPUT, len, data, len)
+#endif
 // this requires compute to have been called to set the hashing algorithm - don't use!
 // ALSO, there is no way to get the return value with this signature
 
