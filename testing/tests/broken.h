@@ -143,6 +143,12 @@
 //#define FN_BROKEN_fuji_hash_data
 #endif /* BUILD_APPLE2 */
 
+#ifdef BUILD_C64
+// missing from firmware
+#define FN_BROKEN_fuji_get_host_prefix
+#define FN_BROKEN_fuji_base64_encode_input
+#endif /* BUILD_C64 */
+
 #endif /* FNLIB_VERSION_MAJOR */
 
 #endif /* BROKEN_H */
