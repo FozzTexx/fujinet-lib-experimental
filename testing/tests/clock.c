@@ -187,6 +187,36 @@ void test_clock_apple3_sos(void)
   END_OF_TEST();
 }
 
+void test_clock_simple_binary_with_millis(void)
+{
+  uint8_t err;
+  uint16_t ms;
+
+  SECTION("clock_get_time SIMPLE_BINARY_WITH_MILLIS");
+
+#ifdef FN_BROKEN_clock_get_time_SIMPLE_BINARY_WITH_MILLIS
+  SKIP(clock_get_time);
+#else
+  memset(g.clock_fmt, 0, sizeof(g.clock_fmt));
+  err = clock_get_time(g.clock_fmt, SIMPLE_BINARY_WITH_MILLIS);
+  TEST("clock_get_time(SIMPLE_BINARY_WITH_MILLIS) returns FN_ERR_OK", err == FN_ERR_OK);
+  TEST("SIMPLE_BINARY_WITH_MILLIS century is 20", g.clock_fmt[0] == 20);
+  TEST("SIMPLE_BINARY_WITH_MILLIS year is in 0-99", g.clock_fmt[1] <= 99);
+  TEST("SIMPLE_BINARY_WITH_MILLIS month is 1-12", g.clock_fmt[2] >= 1 && g.clock_fmt[2] <= 12);
+  TEST("SIMPLE_BINARY_WITH_MILLIS day is 1-31", g.clock_fmt[3] >= 1 && g.clock_fmt[3] <= 31);
+  TEST("SIMPLE_BINARY_WITH_MILLIS hour is 0-23", g.clock_fmt[4] <= 23);
+  TEST("SIMPLE_BINARY_WITH_MILLIS min is 0-59", g.clock_fmt[5] <= 59);
+  TEST("SIMPLE_BINARY_WITH_MILLIS sec is 0-59", g.clock_fmt[6] <= 59);
+  ms = ((uint16_t)g.clock_fmt[7] << 8) | g.clock_fmt[8];
+  TEST("SIMPLE_BINARY_WITH_MILLIS ms is 0-999", ms <= 999);
+  printf("  DateTime: 20%02u-%02u-%02u %02u:%02u:%02u.%03u\n",
+         g.clock_fmt[1], g.clock_fmt[2], g.clock_fmt[3],
+         g.clock_fmt[4], g.clock_fmt[5], g.clock_fmt[6], ms);
+#endif
+
+  END_OF_TEST();
+}
+
 void test_clock_get_time_tz(void)
 {
   uint8_t err;
