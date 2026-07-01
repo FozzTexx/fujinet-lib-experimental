@@ -1,3 +1,4 @@
+#include <fujinet-int.h>
 #include <fujinet-fuji.h>
 
 typedef struct {
