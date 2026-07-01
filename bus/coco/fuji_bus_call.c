@@ -1,30 +1,10 @@
+#include "fb_header.h"
 #include "fujinet-fuji-coco.h"
 #include "fujinet-network-coco.h"
 #include "dw.h"
 
 #include <fujinet-int.h>
 #include <fujinet-bus.h>
-#include <fujinet-commands.h>
-#include <fujinet-const.h>
-
-typedef struct {
-  uint16_t length;
-  uint8_t data[MAX_APPKEY_LEN];
-} FNAppKeyString;
-
-typedef struct {
-  uint8_t opcode;
-  union {
-    uint8_t cmd;
-    struct {
-      uint8_t unit;
-      uint8_t cmd;
-    } net;
-  } fn;
-} fujibus_header;
-
-static fujibus_header fb_header;
-FNAppKeyString appkey_buf;
 
 bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 		   uint8_t aux1, uint8_t aux2, uint8_t aux3, uint8_t aux4,
@@ -92,32 +72,4 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
   return success;
 }
 
-uint16_t network_bus_read(uint8_t device, void *buffer, size_t length)
-{
-  fb_header.opcode = OP_NET;
-  fb_header.fn.net.unit = device - FUJI_DEVICEID_NETWORK + 1;
-  fb_header.fn.net.cmd = FUJICMD_READ;
 
-  bus_ready();
-  dwwrite((uint8_t *) &fb_header, sizeof(fb_header));
-  dwwrite((uint8_t *) &length, sizeof(length));
-  network_get_response(fb_header.fn.net.unit, (uint8_t *) buffer, length);
-
-  return length;
-}
-
-uint16_t network_bus_write(uint8_t device, const void *buffer, size_t length)
-{
-  fb_header.opcode = OP_NET;
-  fb_header.fn.net.unit = device - FUJI_DEVICEID_NETWORK + 1;
-  fb_header.fn.net.cmd = FUJICMD_WRITE;
-
-  bus_ready();
-  dwwrite((uint8_t *) &fb_header, sizeof(fb_header));
-  dwwrite((uint8_t *) &length, sizeof(length));
-  dwwrite((uint8_t *) buffer, length);
-
-  if (network_get_error(fb_header.fn.net.unit))
-    length = 0;
-  return length;
-}
