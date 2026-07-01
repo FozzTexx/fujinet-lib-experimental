@@ -1,6 +1,7 @@
 #include "fuji_bus_appkey.h"
 
 #include <fujinet-commands.h>
+#include <fujinet-bus.h>
 
 FNAppKeyString appkey_buf;
 
