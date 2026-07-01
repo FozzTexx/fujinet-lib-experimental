@@ -1,4 +1,5 @@
-#include "network_unit_status.h"
+#include "network.h"
+
 #include <fujinet-commands.h>
 #include <fujinet-bus.h>
 
