@@ -64,4 +64,3 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
   }
   return true;
 }
-
