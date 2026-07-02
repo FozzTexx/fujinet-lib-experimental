@@ -19,6 +19,6 @@ typedef struct {
 
 extern NetworkStatus nw_status;
 
-#define network_unit_status(unit, nw_status) (!NETCALL_RV(FUJICMD_STATUS, unit, nw_status, sizeof(*nw_status)))
+#define network_unit_status(unit, nws) (!NETCALL_RV(FUJICMD_STATUS, unit, nws, sizeof(NetworkStatus)))
 
 #endif /* NETWORK_UNIT_STATUS_DEFAULT_H */
