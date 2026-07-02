@@ -76,7 +76,23 @@ extern bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 extern size_t fuji_bus_read(uint8_t device, void *buffer, size_t length);
 extern size_t fuji_bus_write(uint8_t device, const void *buffer, size_t length);
 
+#ifdef _CMOC_VERSION_
+#include <fujinet-const.h>
+typedef struct {
+  uint16_t length;
+  uint8_t data[MAX_APPKEY_LEN];
+} FNAppKeyString;
+extern FNAppKeyString appkey_buf;
+#define fuji_bus_appkey_read(string, length) \
+  (uint8_t) (FUJICALL_RV(FUJICMD_READ_APPKEY, &appkey_buf, sizeof(appkey_buf)) ? \
+             (*(length) = appkey_buf.length,                            \
+              memmove((string), appkey_buf.data, appkey_buf.length),    \
+              true) : false)
+#define fuji_bus_appkey_write(string, length) \
+  FUJICALL_B12_D(FUJICMD_WRITE_APPKEY, length, string, MAX_APPKEY_LEN)
+#else
 extern bool fuji_bus_appkey_read(void *string, uint16_t *length);
 extern bool fuji_bus_appkey_write(void *string, uint16_t length);
+#endif /* _CMOC_VERSION_ */
 
 #endif /* FUJINET_BUS_H */
