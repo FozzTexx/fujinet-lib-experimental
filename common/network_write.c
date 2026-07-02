@@ -9,7 +9,7 @@ FN_ERR network_write(const char *devicespec, const void *buf, uint16_t len)
 
   nw_unit = network_unit(devicespec);
   while (len) {
-    wlen = fuji_bus_write(FUJI_DEVICEID_NETWORK + nw_unit - 1, ubuf, len);
+    wlen = network_bus_write(FUJI_DEVICEID_NETWORK + nw_unit - 1, ubuf, len);
     if (len && !wlen)
       return FN_ERR_IO_ERROR;
     len -= wlen;

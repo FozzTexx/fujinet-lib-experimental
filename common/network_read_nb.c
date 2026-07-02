@@ -24,6 +24,6 @@ int16_t network_read_nb(const char *devicespec, void *buf, uint16_t len)
   if (len > nw_status.avail)
     len = nw_status.avail;
 
-  return fuji_bus_read(FUJI_DEVICEID_NETWORK + nw_unit - 1, buf, len);
+  return network_bus_read(FUJI_DEVICEID_NETWORK + nw_unit - 1, buf, len);
 }
 #endif /* ! (__ADAM__ || __COLECOADAM__) */
