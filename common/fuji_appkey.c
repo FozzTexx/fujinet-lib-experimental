@@ -26,10 +26,7 @@ bool fuji_read_appkey(uint8_t key_id, uint16_t *length, uint8_t *data)
   init_appkey(key_id, 0);
   if (!FUJICALL_D(FUJICMD_OPEN_APPKEY, &appkey, sizeof(appkey)))
     return false;
-
-  if (!fuji_bus_appkey_read(data, length))
-    return false;
-  return true;
+  return fuji_bus_appkey_read(data, length);
 }
 
 bool fuji_write_appkey(uint8_t key_id, uint16_t length, uint8_t *data)
