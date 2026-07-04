@@ -13,9 +13,7 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 		   const void *data, size_t data_length,
 		   void *reply, size_t reply_length)
 {
-  uint8_t numbytes, idx;
   uint8_t header_len;
-  bool success;
   uint8_t aux[4];
 
 
@@ -40,14 +38,18 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 
   bus_ready();
   dwwrite((unsigned char *) &fb_header, header_len);
-  numbytes = fuji_field_numbytes(fields);
-  idx = 0;
-  if (numbytes) { aux[idx++] = aux1; numbytes--; }
-  if (numbytes) { aux[idx++] = aux2; numbytes--; }
-  if (numbytes) { aux[idx++] = aux3; numbytes--; }
-  if (numbytes) { aux[idx++] = aux4; numbytes--; }
-  if (idx)
-    dwwrite(aux, idx);
+
+  {
+    uint8_t numbytes = fuji_field_numbytes(fields);
+
+    if (numbytes > 0) aux[0] = aux1;
+    if (numbytes > 1) aux[1] = aux2;
+    if (numbytes > 2) aux[2] = aux3;
+    if (numbytes > 3) aux[3] = aux4;
+    if (numbytes)
+      dwwrite(aux, numbytes);
+  }
+
   if (data && data_length)
     dwwrite((uint8_t *) data, data_length);
 
@@ -58,18 +60,18 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
   }
 
   if (header_len == 3) { // FUJI_DEVICEID_NETWORK
-    success = !network_get_error(fb_header.fn.net.unit);
-    if (success && reply)
-      success = !network_get_response(fb_header.fn.net.unit,
-                                      (uint8_t *) reply,
-                                      reply_length);
-  }
-  else {
-    success = !fuji_get_error();
-    if (success && reply)
-      success = fuji_get_response((uint8_t *) reply,
-                                  reply_length);
+    if (network_get_error(fb_header.fn.net.unit))
+      return false;
+    if (reply
+        && network_get_response(fb_header.fn.net.unit, (uint8_t *) reply, reply_length))
+      return false;
+    return true;
   }
 
-  return success;
+  if (fuji_get_error())
+    return false;
+  if (reply)
+    return fuji_get_response((uint8_t *) reply, reply_length);
+
+  return true;
 }
