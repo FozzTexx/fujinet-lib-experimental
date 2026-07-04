@@ -122,7 +122,9 @@ fbc_store_opcode:
 * ── Send header ──────────────────────────────────────────────────────────────
 
 fbc_send_header:
+	pshs	x,b
         jsr     _bus_ready              * no args, return value unused
+	puls	x,b
 
 * dwwrite(&fb_header, header_len)
 * X = &fb_header (still valid from above), B = header_len
