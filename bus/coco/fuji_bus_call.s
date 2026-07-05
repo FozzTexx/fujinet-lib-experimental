@@ -31,7 +31,6 @@
         extern  _fuji_field_numbytes_table
 
         export  _fuji_bus_call
-        export  _fb_header
 
 FUJI_DEVICEID_NETWORK       equ     $71
 FUJI_DEVICEID_NETWORK_LAST  equ     $78
