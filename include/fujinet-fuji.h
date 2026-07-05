@@ -365,7 +365,7 @@ bool fuji_open_directory_filter(uint8_t hostSlot, const char *path, const char *
  * @brief Fill buffer with directory information.
  * @return success status of request
  */
-extern bool fuji_read_directory(uint8_t maxlen, uint8_t aux2, char *buffer);
+extern bool fuji_read_directory(uint8_t maxlen, uint8_t aux2, void *buffer);
 
 /**
  * @brief Reset FN

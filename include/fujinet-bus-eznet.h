@@ -82,7 +82,7 @@
 #else /* ! _CMOC_VERSION_ */
 
 #define NETCALL(cmd, unit)                                                        \
-  DEVCALL(FUJI_DEVICEID_NETWORK + (unit) - 1)
+  DEVCALL(FUJI_DEVICEID_NETWORK + (unit) - 1, cmd)
 
 #define NETCALL_D(cmd, unit, data, len)                                           \
   DEVCALL_D(FUJI_DEVICEID_NETWORK + (unit) - 1, cmd, data, len)
