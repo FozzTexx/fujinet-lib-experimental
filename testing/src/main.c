@@ -53,7 +53,6 @@ int main(void)
 #if FUJI_TESTS
   /* fuji.h */
   test_fuji_status();
-  exit(1);
   test_fuji_adapter_config();
   test_fuji_host_device_slots();
   test_fuji_device_filename();

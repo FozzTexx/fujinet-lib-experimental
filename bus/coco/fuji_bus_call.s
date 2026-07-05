@@ -3,23 +3,21 @@
 * bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields, ...)
 *
 * Varargs follow fields in this order:
-*   0..4 uint8_t aux bytes   (count = fuji_field_numbytes(fields))
+*   0..4 uint8_t aux bytes   (count = fuji_field_numbytes(fields & $07))
 *   const void *data, size_t data_length   if (fields & $08)
 *   void *reply, size_t reply_length       if (fields & $10)
 *   (data and reply are mutually exclusive)
 *
 * Return: bool in B (non-zero = success).
 *
-* Technique: after PSHS U / LEAU ,S / LEAU 4,U, U points at the first
-* argument (device). PULU D consumes each successive argument and advances
-* U by 2 (each arg is a promoted uint8_t or a 16-bit pointer). Called
-* functions preserve U, so our position in the arg stream survives every JSR.
+* After PSHS U / LEAU ,S / LEAU 4,U, U points at device (first arg).
+* PULU walks U through each argument in order. Called functions preserve U,
+* so position in the arg stream survives every JSR.
 *
-* Three values need to survive function calls and are saved on S:
-*   [S+0] numbytes   (1 byte, PSHS B)
-*   [S+1] fields     (1 byte, PSHS B)
-*   [S+2] header_len (1 byte, PSHS B)
-* All at 5-bit offsets from S -- 2-byte instructions throughout.
+* Three values saved on S (all within 5-bit offset range):
+*   [S+0] numbytes   (1 byte)
+*   [S+1] fields     (1 byte, raw -- DATA/REPLY bits intact)
+*   [S+2] header_len (1 byte)
 
         section code
 
@@ -47,39 +45,36 @@ FIELDS_REPLY                equ     $10
 
 _fuji_bus_call:
         pshs    u               * save caller's U
-        leau    ,s              * U = S (points to saved U on stack)
+        leau    ,s              * U = S
         leau    4,u             * U = first arg (device); skip saved U + return addr
 
-* Load &fb_header into X early -- used for all three header field stores
-* AND as the pointer argument to the first dwwrite call, saving a reload.
-        ldx     #_fb_header
+*── Build header ──────────────────────────────────────────────────────────────
 
-* ── Determine device type, build header ──────────────────────────────────────
-
-        pulu    d               * B = device
+        pulu    b               * discard high byte
+        pulu    b               * B = device
 
         cmpb    #FUJI_DEVICEID_NETWORK
         blo     fbc_not_network
         cmpb    #FUJI_DEVICEID_NETWORK_LAST
         bhi     fbc_not_network
 
-* Network device: 3-byte header (opcode + unit + cmd)
+        * Network: 3-byte header (opcode + unit + cmd)
         lda     #OP_NET
-        sta     ,x                      * fb_header.opcode = OP_NET
-        subb    #FUJI_DEVICEID_NETWORK-1  * unit = device - $71 + 1 = device - $70
-        stb     1,x                     * fb_header.fn.net.unit
-        pulu    d               * B = fuji_cmd
-        stb     2,x                     * fb_header.fn.net.cmd
-        ldb     #3                      * header length for dwwrite
-        bra     fbc_send_header
+        sta     >_fb_header
+        subb    #FUJI_DEVICEID_NETWORK-1    * unit = device - $70
+        stb     >_fb_header+1
+        pulu    b               * discard high byte of fuji_cmd
+        pulu    b               * B = fuji_cmd
+        stb     >_fb_header+2
+        ldb     #3              * header_len
+        bra     fbc_got_header
 
 fbc_not_network:
         cmpb    #FUJI_DEVICEID_CLOCK
         beq     fbc_is_clock
         cmpb    #FUJI_DEVICEID_FUJINET
         beq     fbc_is_fuji
-
-* Invalid device -- return false immediately (avoids long branch to far label)
+        * invalid device
         clrb
         puls    u
         rts
@@ -87,81 +82,69 @@ fbc_not_network:
 fbc_is_clock:
         lda     #OP_CLOCK
         bra     fbc_store_opcode
-
 fbc_is_fuji:
         lda     #OP_FUJI
-
 fbc_store_opcode:
-* Non-network device: 2-byte header (opcode + cmd)
-        sta     ,x                      * fb_header.opcode
-        pulu    d               * B = fuji_cmd
-        stb     1,x                     * fb_header.fn.cmd
-        ldb     #2                      * header length for dwwrite
+        * Non-network: 2-byte header (opcode + cmd)
+        sta     >_fb_header
+        pulu    b               * discard high byte of fuji_cmd
+        pulu    b               * B = fuji_cmd
+        stb     >_fb_header+1
+        ldb     #2              * header_len
 
-* ── Send header ──────────────────────────────────────────────────────────────
+fbc_got_header:
+        pshs    b               * save header_len -- [S+0]=header_len
 
-fbc_send_header:
-	pshs	x,b
-        jsr     _bus_ready              * no args, return value unused
-	puls	x,b
+        pulu    b               * discard high byte of fields
+        pulu    b               * B = fields (raw, DATA/REPLY bits intact)
+        pshs    b               * save fields   -- [S+0]=fields [S+1]=header_len
 
-* dwwrite(&fb_header, header_len)
-* X = &fb_header (still valid from above), B = header_len
-* CMOC convention: push rightmost arg first (header_len), then pointer
-        clra                            * A:B = 0:header_len = uint16_t
-        pshs    d                       * push header_len
-        pshs    x                       * push &fb_header
-        jsr     _dwwrite
-        leas    4,s                     * caller cleanup
-
-* ── Pack and send aux bytes ──────────────────────────────────────────────────
-* Use B for numbytes throughout; use A for each aux value transfer.
-* Fixed-offset stores to local aux array avoid pointer-spill overhead.
-
-        pulu	d                       * fields
+        andb    #$07            * mask to numbytes index bits only
         ldx     #_fuji_field_numbytes_table
-        ldb     b,x                     * B = fuji_field_numbytes_table[fields] (0..4)
-        beq     fbc_no_aux              * if 0, nothing to send
+        ldb     b,x             * B = numbytes
+        pshs    b               * save numbytes -- [S+0]=numbytes [S+1]=fields [S+2]=header_len
 
-	ldx	#_fuji_aux_buf
-        pulu	d                       * aux1 (always present: numbytes >= 1)
-        stb     ,x+                     * aux[0]
+*── Collect aux bytes into buffer ─────────────────────────────────────────────
+
+        beq     fbc_no_aux
+
+        leax    _fuji_aux_buf,pcr
+
+        pulu    b               * discard high byte
+        pulu    b               * aux1
+        stb     ,x+
+        ldb     ,s              * reload numbytes
         cmpb    #2
-        blo     fbc_send_aux
-        lda     13,u                    * aux2
-        sta     -3,u                    * aux[1]
+        blo     fbc_no_aux
+        pulu    b
+        pulu    b               * aux2
+        stb     ,x+
+        ldb     ,s
         cmpb    #3
-        blo     fbc_send_aux
-        lda     15,u                    * aux3
-        sta     -2,u                    * aux[2]
+        blo     fbc_no_aux
+        pulu    b
+        pulu    b               * aux3
+        stb     ,x+
+        ldb     ,s
         cmpb    #4
-        blo     fbc_send_aux
-        lda     17,u                    * aux4 (3-byte: offset 17 > 15)
-        sta     -1,u                    * aux[3]
-
-fbc_send_aux:
-* dwwrite(aux, numbytes) -- B = numbytes, A = last aux value (don't care)
-        clra                            * A:B = 0:numbytes = uint16_t
-        pshs    d
-        leax    -4,u                    * &aux[0]
-        pshs    x
-        jsr     _dwwrite
-        leas    4,s
+        blo     fbc_no_aux
+        pulu    b
+        pulu    b               * aux4
+        stb     ,x+
 
 fbc_no_aux:
 
-*── Send header and aux bytes ─────────────────────────────────────────────────
-* U preserved across all calls; our S-saved values survive via S preservation.
+*── Send header and aux ───────────────────────────────────────────────────────
 
-	pshs	x,b
+        pshs    x,b             * save X (aux_buf ptr) and B across bus_ready
         jsr     _bus_ready
-	puls	x,b
+        puls    x,b             * restore
 
         * dwwrite(&fb_header, header_len)
         ldb     2,s             * header_len
         clra
         pshs    d               * push header_len
-        ldx     #_fb_header
+        leax    _fb_header,pcr
         pshs    x               * push &fb_header
         jsr     _dwwrite
         leas    4,s
@@ -172,8 +155,7 @@ fbc_no_aux:
         clra
         pshs    d               * push numbytes
         leax    _fuji_aux_buf,pcr
-        tfr     x,d
-        pshs    d               * push &aux_buf
+        pshs    x               * push &aux_buf
         jsr     _dwwrite
         leas    4,s
 
@@ -185,12 +167,11 @@ fbc_no_aux_send:
         bitb    #FIELDS_DATA
         beq     fbc_no_data
 
-        pulu    d               * data_ptr
-        tfr     d,x             * X = data_ptr
+        pulu    d               * data_ptr (16-bit, no promotion)
+        tfr     d,x             * save in X
         pulu    d               * data_length
         pshs    d               * push data_length
-        tfr     x,d
-        pshs    d               * push data_ptr
+        pshs    x               * push data_ptr
         jsr     _dwwrite
         leas    4,s
 
@@ -219,8 +200,7 @@ fbc_no_data:
         tfr     d,x
         pulu    d               * reply_length
         pshs    d               * push reply_length
-        tfr     x,d
-        pshs    d               * push reply_ptr
+        pshs    x               * push reply_ptr
         jsr     _fuji_get_response
         leas    4,s
         bra     fbc_exit        * B = return value
@@ -235,9 +215,8 @@ fbc_clock_reply:
         pulu    d               * reply_ptr
         tfr     d,x
         pulu    d               * reply_length
-        pshs    d
-        tfr     x,d
-        pshs    d
+        pshs    d               * push reply_length
+        pshs    x               * push reply_ptr
         jsr     _dwread
         leas    4,s
         bra     fbc_exit        * B = return value
@@ -245,8 +224,8 @@ fbc_clock_reply:
 *── Network path ──────────────────────────────────────────────────────────────
 
 fbc_net_reply:
-        ldb     >_fb_header+1   * unit
         clra
+        ldb     >_fb_header+1   * unit
         pshs    d               * push unit
         jsr     _network_get_error
         leas    2,s
@@ -261,10 +240,9 @@ fbc_net_reply:
         tfr     d,x
         pulu    d               * reply_length
         pshs    d               * push reply_length
-        tfr     x,d
-        pshs    d               * push reply_ptr
-        ldb     >_fb_header+1   * unit
+        pshs    x               * push reply_ptr
         clra
+        ldb     >_fb_header+1   * unit
         pshs    d               * push unit
         jsr     _network_get_response
         leas    6,s
