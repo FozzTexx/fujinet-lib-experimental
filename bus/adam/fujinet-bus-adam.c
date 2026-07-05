@@ -2,6 +2,7 @@
 #include "fujinet-bus.h"
 #include "fujinet-commands.h"
 #include <string.h>
+#include <stdarg.h>
 
 #include <stdio.h> // debug
 
@@ -76,41 +77,36 @@ uint8_t fuji_remap_device(uint8_t device)
   return device;
 }
 
-bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
-		   uint8_t aux1, uint8_t aux2, uint8_t aux3, uint8_t aux4,
-		   const void *data, size_t data_length,
-		   void *reply, size_t reply_length)
+bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields, ...)
 {
   DCB *dcb;
   uint16_t idx, numbytes;
   uint8_t status;
+  va_list ap;
 
 
   device = fuji_remap_device(device);
   if (!device)
     return false;
 
+  va_start(ap, fields);
   idx = 0;
   fb_packet[idx++] = fuji_cmd;
 
   numbytes = fuji_field_numbytes(fields);
-  if (numbytes) {
-    fb_packet[idx++] = aux1;
-    numbytes--;
-  }
-  if (numbytes) {
-    fb_packet[idx++] = aux2;
-    numbytes--;
-  }
-  if (numbytes) {
-    fb_packet[idx++] = aux3;
-    numbytes--;
-  }
-  if (numbytes) {
-    fb_packet[idx++] = aux4;
-    numbytes--;
-  }
-  if (data) {
+  if (numbytes > 0)
+    fb_packet[idx++] = va_arg(ap, uint8_t);
+  if (numbytes > 1)
+    fb_packet[idx++] = va_arg(ap, uint8_t);
+  if (numbytes > 2)
+    fb_packet[idx++] = va_arg(ap, uint8_t);
+  if (numbytes > 3)
+    fb_packet[idx++] = va_arg(ap, uint8_t);
+  if (fields & FUJI_FIELD_DATA) {
+    const uint8_t *data = va_arg(ap, uint8_t *);
+    const uint16_t data_length = va_arg(ap, uint16_t);
+
+
     memcpy(&fb_packet[idx], data, data_length);
     idx += data_length;
   }
@@ -123,11 +119,17 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
   if (status != DCB_STATUS_FINISH)
     return false;
 
-  if (reply) {
+  if (fields & FUJI_FIELD_REPLY) {
+    uint8_t *reply = va_arg(ap, uint8_t *);
+    uint16_t reply_length = va_arg(ap, uint16_t);
+
+
     status = dcb_io(dcb, DCB_COMMAND_READ, reply, reply_length);
     if (status != DCB_STATUS_FINISH)
       return false;
   }
+
+  va_end(ap);
 
   return true;
 }
