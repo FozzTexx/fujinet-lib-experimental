@@ -20,19 +20,6 @@
 #define FUJI_DEVICEID_SERIAL_LAST       0x53
 #define FUJI_DEVICEID_VOICE		0x43
 
-enum {
-  FUJI_FIELD_NONE        = 0,
-  FUJI_FIELD_A1          = 1,
-  FUJI_FIELD_A1_A2       = 2,
-  FUJI_FIELD_A1_A2_A3    = 3,
-  FUJI_FIELD_A1_A2_A3_A4 = 4,
-  FUJI_FIELD_B12         = 5,
-  FUJI_FIELD_B12_B34     = 6,
-  FUJI_FIELD_C1234       = 7,
-  FUJI_FIELD_DATA        = 8,
-  FUJI_FIELD_REPLY       = 16,
-};
-
 #define FUJI_FIELD_LOOKUP_TABLE 1
 #ifdef FUJI_FIELD_LOOKUP_TABLE
 
