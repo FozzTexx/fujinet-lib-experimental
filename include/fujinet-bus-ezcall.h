@@ -3,6 +3,19 @@
 
 #include <fujinet-endian.h>
 
+enum {
+  FUJI_FIELD_NONE        = 0,
+  FUJI_FIELD_A1          = 1,
+  FUJI_FIELD_A1_A2       = 2,
+  FUJI_FIELD_A1_A2_A3    = 3,
+  FUJI_FIELD_A1_A2_A3_A4 = 4,
+  FUJI_FIELD_B12         = 5,
+  FUJI_FIELD_B12_B34     = 6,
+  FUJI_FIELD_C1234       = 7,
+  FUJI_FIELD_DATA        = 8,
+  FUJI_FIELD_REPLY       = 16,
+};
+
 /* Fuji Call Macro Naming Convention:
  *
  *   A#      = individual 8-bit aux fields (e.g. A1, A1_A2)
