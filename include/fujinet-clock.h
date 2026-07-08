@@ -41,6 +41,8 @@ typedef enum time_format_t {
 #define CLK_CMD_APPLE3_SOS_BINARY  APETIMECMD_GET_SOS
 #define CLK_CMD_SIMPLE_BINARY_WITH_HUNDREDTHS APETIMECMD_GET_SIMPLE_HUNDREDTHS
 
+extern const uint8_t clk_reply_len[TIMEFORMAT_COUNT];
+
 /**
  * @brief  Set the FN clock's system timezone
  * @param  tz the timezone string to apply
