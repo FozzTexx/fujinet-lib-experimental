@@ -27,6 +27,8 @@
 #define DIRENTRY_FILENAME_OFFSET 13
 #endif
 
+#define TNFS_COPY_SOURCE_HOST "tnfs.fujinet.online"
+
 /* Network device specs used across tests */
 #define NET_DEVICESPEC  "N1:HTTPS://fujinet.online/"
 #define NET_JSON_URL    "N1:HTTPS://httpbin.org/json"

@@ -18,6 +18,7 @@ void test_fuji_copy_file(void)
   uint8_t sd_idx;
   bool found_src;
   bool found_sd;
+  bool src_preexisting;
   uint8_t *slot;
   uint8_t saved_src[32];
   char copy_spec[40];
@@ -35,6 +36,7 @@ void test_fuji_copy_file(void)
   sd_idx = 0;
   found_src = false;
   found_sd = false;
+  src_preexisting = false;
   src_size = 0;
   dest_size = 0;
   copy_ok = false;
@@ -53,12 +55,27 @@ void test_fuji_copy_file(void)
   ok = fuji_get_host_slots(&g.slots.hosts[0], MAX_HOSTS);
   TEST("fuji_get_host_slots succeeds", ok);
 
-  /* CMOC: g.slots.hosts[i][j] strides by 1 byte; use pointer decay instead. */
+  /* CMOC: g.slots.hosts[i][j] strides by 1 byte; use pointer decay instead.
+   * Prefer an existing tnfs.fujinet.online slot; only borrow an empty one
+   * if none exists, so there's nothing to restore afterward. */
   for (i = 0; i < MAX_HOSTS; i++) {
     slot = (uint8_t *)g.slots.hosts[i];
-    if (slot[0] == '\0' && !found_src) {
+    if (strncmp((char *)slot, TNFS_COPY_SOURCE_HOST, 32) == 0) {
       src_idx = i;
       found_src = true;
+      src_preexisting = true;
+      break;
+    }
+  }
+
+  if (!found_src) {
+    for (i = 0; i < MAX_HOSTS; i++) {
+      slot = (uint8_t *)g.slots.hosts[i];
+      if (slot[0] == '\0') {
+        src_idx = i;
+        found_src = true;
+        break;
+      }
     }
   }
 
@@ -71,16 +88,19 @@ void test_fuji_copy_file(void)
     }
   }
   TEST("SD host slot found", found_sd);
-  printf("  src slot %u  sd slot %u\n",
-         (unsigned)(src_idx + 1), (unsigned)(sd_idx + 1));
+  printf("  src slot %u  sd slot %u  (%s)\n",
+         (unsigned)(src_idx + 1), (unsigned)(sd_idx + 1),
+         src_preexisting ? "already present" : "temporary");
 
-  slot = (uint8_t *)g.slots.hosts[src_idx];
-  memcpy(saved_src, slot, 32);
-  memset(slot, 0, 32);
-  strcpy((char *)slot, "tnfs.fujinet.online");
+  if (!src_preexisting) {
+    slot = (uint8_t *)g.slots.hosts[src_idx];
+    memcpy(saved_src, slot, 32);
+    memset(slot, 0, 32);
+    strcpy((char *)slot, TNFS_COPY_SOURCE_HOST);
 
-  ok = fuji_put_host_slots(&g.slots.hosts[0], MAX_HOSTS);
-  TEST("fuji_put_host_slots (with source) succeeds", ok);
+    ok = fuji_put_host_slots(&g.slots.hosts[0], MAX_HOSTS);
+    TEST("fuji_put_host_slots (with source) succeeds", ok);
+  }
 
   ok = fuji_mount_host_slot(src_idx);
   TEST("fuji_mount_host_slot (TNFS) succeeds", ok);
@@ -140,17 +160,19 @@ void test_fuji_copy_file(void)
          (unsigned)(src_idx + 1), (unsigned)(sd_idx + 1), copy_spec);
   copy_ok = fuji_copy_file(src_idx + 1, sd_idx + 1, copy_spec);
 
-  /* Re-read first — g.slots.hosts/g.dir alias in the union. */
-  ok = fuji_get_host_slots(&g.slots.hosts[0], MAX_HOSTS);
-  TEST("fuji_get_host_slots (restore re-read) succeeds", ok);
-  if (ok) {
-    /* Only patch and write back if the re-read actually refreshed the
-     * buffer — otherwise g.slots.hosts still holds stale union data from
-     * the TNFS source stat above, and writing it back would corrupt the
-     * other 7 host slots on the device. */
-    slot = (uint8_t *)g.slots.hosts[src_idx];
-    memcpy(slot, saved_src, 32);
-    fuji_put_host_slots(&g.slots.hosts[0], MAX_HOSTS);
+  if (!src_preexisting) {
+    /* Re-read first — g.slots.hosts/g.dir alias in the union. */
+    ok = fuji_get_host_slots(&g.slots.hosts[0], MAX_HOSTS);
+    TEST("fuji_get_host_slots (restore re-read) succeeds", ok);
+    if (ok) {
+      /* Only patch and write back if the re-read actually refreshed the
+       * buffer — otherwise g.slots.hosts still holds stale union data from
+       * the TNFS source stat above, and writing it back would corrupt the
+       * other 7 host slots on the device. */
+      slot = (uint8_t *)g.slots.hosts[src_idx];
+      memcpy(slot, saved_src, 32);
+      fuji_put_host_slots(&g.slots.hosts[0], MAX_HOSTS);
+    }
   }
   fuji_mount_host_slot(sd_idx);
 
