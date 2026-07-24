@@ -2,7 +2,7 @@
 
 bool fuji_set_directory_position(uint16_t pos)
 {
-#ifdef _CMOC_VERSION_
+#if 0 //def _CMOC_VERSION_
 #warning "A1_A2 shouldn't be necessary"
   return FUJICALL_A1_A2(FUJICMD_SET_DIRECTORY_POSITION, U16_MSB(pos), U16_LSB(pos));
 #else
