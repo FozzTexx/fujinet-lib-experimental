@@ -31,7 +31,7 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
   if (fields & (FUJI_FIELD_DATA | FUJI_FIELD_REPLY))
     direction = fields & FUJI_FIELD_DATA ? FUJI_DIR_WRITE : FUJI_DIR_READ;
 
-  rcode = fujiF5(direction, device, fuji_cmd, fields,
+  rcode = fujiF5(direction, device, fuji_cmd, fields & 0x07,
                  (aux2 << 8) | aux1,
                  (aux4 << 8) | aux3,
                  (void *) buf, buf_length);
