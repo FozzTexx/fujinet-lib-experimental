@@ -18,7 +18,7 @@ extern int fujiF5w(uint16_t descrdir, uint16_t devcom,
   parm [dx] [ax] [cx] [si] [es bx] [di] \
   modify [ax]
 #define fujiF5(dir, dev, cmd, descr, a12, a34, buf, len)         \
-  fujiF5w(descr << 8 | dir, cmd << 8 | dev, a12, a34, buf, len)
+  fujiF5w((descr) << 8 | (dir), (cmd) << 8 | (dev), a12, a34, buf, len)
 
 bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 		   uint8_t aux1, uint8_t aux2, uint8_t aux3, uint8_t aux4,
