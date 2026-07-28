@@ -2,6 +2,10 @@
 
 #include "harness.h"
 #include "globals.h"
+
+// QR codes were added in v5.0.0; the header doesn't exist before that.
+#if FNLIB_VERSION_MAJOR >= 5
+
 #include <fujinet-qrcode.h>
 
 #ifndef _CMOC_VERSION_
@@ -278,3 +282,5 @@ void test_fuji_qrcode(void)
 
   END_OF_TEST();
 }
+
+#endif /* FNLIB_VERSION_MAJOR >= 5 */
