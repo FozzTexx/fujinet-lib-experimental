@@ -3,10 +3,26 @@
 #include "harness.h"
 #include "globals.h"
 
-// QR codes were added in v5.0.0; the header doesn't exist before that.
 #if FNLIB_VERSION_MAJOR >= 5
-
 #include <fujinet-qrcode.h>
+#else
+typedef enum QRCodeEcc
+{
+    QR_ECC_LOW,
+    QR_ECC_MEDIUM,
+    QR_ECC_QUARTILE,
+    QR_ECC_HIGH
+} qr_ecc_t;
+typedef enum QRCodeOutputMode
+{
+    QR_OUTPUT_MODE_BINARY,
+    QR_OUTPUT_MODE_ANSI,
+    QR_OUTPUT_MODE_BITMAP,
+    QR_OUTPUT_MODE_SVG,
+    QR_OUTPUT_MODE_ATASCII,
+    QR_OUTPUT_MODE_PETSCII
+} qr_output_mode_t;
+#endif /* FNLIB_VERSION_MAJOR >= 5 */
 
 #ifndef _CMOC_VERSION_
 #include <stdio.h>
@@ -116,6 +132,9 @@ static const uint8_t QR_BINARY_V2_OUT[] = {
 static bool qr_encode_ready(uint8_t version, qr_ecc_t ecc, qr_output_mode_t mode,
                              uint8_t *data, uint16_t data_len, unsigned long *out_len)
 {
+#ifdef FN_BROKEN_fuji_qrcode_input
+  return false;
+#else
   if (!fuji_qrcode_input(data, data_len))
     return false;
 
@@ -124,6 +143,7 @@ static bool qr_encode_ready(uint8_t version, qr_ecc_t ecc, qr_output_mode_t mode
 
   *out_len = 0;
   return fuji_qrcode_length(mode, out_len);
+#endif
 }
 
 // Bundled to fit CoCo's code budget; unrolled per-step calls didn't fit.
@@ -131,6 +151,9 @@ static bool qr_check_mode(uint8_t version, qr_ecc_t ecc, qr_output_mode_t mode,
                            uint8_t *data, uint16_t data_len,
                            const uint8_t *expected, uint16_t expected_len)
 {
+#ifdef FN_BROKEN_fuji_qrcode_output
+  return false;
+#else
   unsigned long enc_len;
 
   if (!qr_encode_ready(version, ecc, mode, data, data_len, &enc_len))
@@ -144,6 +167,7 @@ static bool qr_check_mode(uint8_t version, qr_ecc_t ecc, qr_output_mode_t mode,
     return false;
 
   return memcmp(g.qrcode_verify.output1, expected, expected_len) == 0;
+#endif
 }
 
 // ANSI/SVG renderings run into the kilobytes, so only success/length is checked here.
@@ -151,6 +175,9 @@ static bool qr_encode_and_drain(uint8_t version, qr_ecc_t ecc, bool shorten,
                                  qr_output_mode_t mode, uint8_t *data, uint16_t data_len,
                                  unsigned long *total_len)
 {
+#ifdef FN_BROKEN_fuji_qrcode_input
+  return false;
+#else
   unsigned long remaining;
   uint16_t chunk;
 
@@ -172,6 +199,7 @@ static bool qr_encode_and_drain(uint8_t version, qr_ecc_t ecc, bool shorten,
   }
 
   return true;
+#endif
 }
 
 void test_fuji_qrcode(void)
@@ -191,23 +219,26 @@ void test_fuji_qrcode(void)
 
 #ifdef FN_BROKEN_fuji_qrcode_input
   SKIP(fuji_qrcode_input);
-#endif
+#else
   ok = fuji_qrcode_input(input, in_len);
   TEST("fuji_qrcode_input succeeds", ok);
+#endif
 
 #ifdef FN_BROKEN_fuji_qrcode_encode
   SKIP(fuji_qrcode_encode);
-#endif
+#else
   ok = fuji_qrcode_encode(0, QR_ECC_LOW, false);
   TEST("fuji_qrcode_encode succeeds", ok);
+#endif
 
 #ifdef FN_BROKEN_fuji_qrcode_length
   SKIP(fuji_qrcode_length);
-#endif
+#else
   enc_len = 0;
   ok = fuji_qrcode_length(QR_OUTPUT_MODE_BINARY, &enc_len);
   TEST("fuji_qrcode_length succeeds", ok);
   TEST("Encoded length matches expected reference", enc_len == sizeof(QR_BINARY_OUT));
+#endif
 
 #ifdef FN_BROKEN_fuji_qrcode_output
   SKIP(fuji_qrcode_output);
@@ -282,5 +313,3 @@ void test_fuji_qrcode(void)
 
   END_OF_TEST();
 }
-
-#endif /* FNLIB_VERSION_MAJOR >= 5 */
