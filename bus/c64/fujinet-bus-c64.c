@@ -57,7 +57,7 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields, ...)
     idx += data_length;
   }
 
-  if (device >= FUJI_DEVICEID_NETWORK  && device <= FUJI_DEVICEID_NETWORK_LAST) {
+  if (device >= FUJI_DEVICEID_NETWORK && device <= FUJI_DEVICEID_NETWORK_LAST) {
     cbm_chan = device - FUJI_DEVICEID_NETWORK + CBM_DATA_CHANNEL_0;
     cbm_dev = CBM_DEV_NETWORK;
   }
@@ -83,8 +83,6 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields, ...)
 
 
     rlen = cbm_read(CBM_CMD_CHANNEL, reply, reply_length);
-    if (rlen != reply_length)
-      success = false;
   }
 
   va_end(ap);
