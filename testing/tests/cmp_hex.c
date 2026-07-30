@@ -6,6 +6,7 @@
 #else
 #include <stdio.h>
 #include <stdint.h>
+#include <ctype.h>
 #endif /* _CMOC_VERSION_ */
 
 #define COLUMNS 16
@@ -44,8 +45,7 @@ void print_hex_diff(const char *label,
         else
           printf(" ");
 
-        printf("%02x", print_buf[idx]);
-      }
+        printf("%02x", print_buf[idx]);      }
       else {
         if (in_diff_hex) {
           printf("]  ");
@@ -60,10 +60,9 @@ void print_hex_diff(const char *label,
 
     for (inner = 0; inner < COLUMNS && (outer + inner) < print_len; inner++) {
       uint8_t c;
-
-
       c = print_buf[inner + outer];
-      printf("%c", c >= ' ' && c <= 0x7f ? c : '.');
+      //printf("%c", c >= ' ' && c <= 0x7f ? c : '.');
+      printf("%c", isprint(c) ? c : '.');
     }
 
     printf("|\n");

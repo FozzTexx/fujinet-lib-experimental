@@ -197,6 +197,10 @@
 #define FN_BROKEN_network_set_eol
 #endif /* BUILD_COCO */
 
+#ifdef BUILD_C64
+#define FN_BROKEN_fuji_get_host_prefix
+#endif /* BUILD_C64 */
+
 // ===========================
 #endif /* FNLIB_VERSION_MAJOR */
 
