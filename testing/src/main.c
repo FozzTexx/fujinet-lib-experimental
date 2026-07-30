@@ -55,7 +55,6 @@ int main(void)
 
 #if FUJI_TESTS
   /* fuji.h */
-#ifdef UNUSED
   test_fuji_status();
   test_fuji_adapter_config();
   test_fuji_host_device_slots();
@@ -66,7 +65,6 @@ int main(void)
   test_fuji_network_scan();
   test_fuji_appkey();
   test_fuji_guid();
-#endif /* UNUSED */
   test_fuji_base64();
   test_fuji_hashing();
 #endif // FUJI_TESTS
