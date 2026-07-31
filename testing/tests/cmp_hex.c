@@ -3,6 +3,7 @@
 #include "cmp_hex.h"
 #ifdef _CMOC_VERSION_
 #include <coco.h>
+#define isprint(c) ((c) >= 32 && (c) <= 126)
 #else
 #include <stdio.h>
 #include <stdint.h>
