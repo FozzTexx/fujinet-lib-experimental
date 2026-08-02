@@ -13,6 +13,8 @@
 
 void fnio_flush_recv(void)
 {
+  char _r;
+
   while (ser_get(&_r) != SER_ERR_NO_DATA);
 }
 
@@ -20,22 +22,21 @@ void fnio_flush_recv(void)
 // receive an ACK or NAK
 // returns 1 on ACK received or 0 on NAK
 // Call after commands that don't send back any data
-unsigned char fnio_recv_ack(void)
+bool fnio_recv_ack(void)
 {
-	unsigned char t;
+  int t;
 
   // reset error status
   _fn_error = FNIO_ERR_NONE;
 
   t = _serial_get_loop();
-  if (!t)
-  	return(0);
+  if (t < 0)
+    return false;
 
-  if (_r == FUJICMD_ACK)
-    return(1);
-  else {
-	  _fn_error = FNIO_ERR_CMD_FAILED;
-    fnio_flush_recv();
-    return(0);
-	}
+  if (t == FUJICMD_ACK)
+    return true;
+
+  _fn_error = FNIO_ERR_CMD_FAILED;
+  fnio_flush_recv();
+  return false;
 }

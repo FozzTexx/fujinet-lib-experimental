@@ -1,4 +1,5 @@
 #include "fujinet-fuji.h"
+#include "fujinet-int.h"
 #include "lynxfnio.h"
 
 #include <stdint.h>
@@ -66,10 +67,10 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
   r = fnio_send_buf(device, &_lynx_packet[0], _lynx_len);
   if (!r)
     return(false);
-  
+
   // Get reply if one expected
   if (reply) {
-    r = fnio_recv_buf(reply, &_lynx_len);
+    r = fnio_recv_buf(reply, &_lynx_len, reply_length);
     if ((!r) || (_lynx_len == 0))
       return(false);
   }

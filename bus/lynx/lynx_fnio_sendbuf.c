@@ -26,14 +26,16 @@
 unsigned char fnio_send_buf(unsigned char dev, char *buf, unsigned int len)
 {
   register unsigned short i;
-  unsigned char ret;
+  int ret;
+  char _r;
+  uint8_t _ck;
 
 
   // reset error status
   _fn_error = FNIO_ERR_NONE;
 
   // Calculate checksum on buffer
-  _checksum(buf, len);
+  _ck = _checksum(buf, len);
 
   // Send the Device and Length
   ser_put(dev);
@@ -44,7 +46,7 @@ unsigned char fnio_send_buf(unsigned char dev, char *buf, unsigned int len)
   ser_get(&_r);
 
   // send the payload
-  for(i=0; i<len; ++i) {
+  for (i=0; i<len; ++i) {
     //while (ser_put(buf[i]) != SER_ERR_OVERFLOW);        // handle if we overflowed the TX buffer
     ser_put(buf[i]);
     ser_get(&_r);         // get rid of reflected data we just sent
@@ -56,14 +58,14 @@ unsigned char fnio_send_buf(unsigned char dev, char *buf, unsigned int len)
 
   // Get response
   ret = _serial_get_loop();
-  if (!ret)
-	  return(0);
+  if (ret < 0)
+    return false;
 
-  // r contains our response, ACK or NACK
-  if (_r == FUJICMD_ACK)
-    return(1);
+  // ret contains our response, ACK or NACK
+  if (ret == FUJICMD_ACK)
+    return true;
   else {
-	  _fn_error = FNIO_ERR_SEND_CHK;
-    return(0);
-	}
+    _fn_error = FNIO_ERR_SEND_CHK;
+    return false;
+  }
 }

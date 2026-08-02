@@ -11,10 +11,12 @@
 
 
 
-unsigned char fnio_recv_buf(char *buf, unsigned int *len)
+bool fnio_recv_buf(char *buf, unsigned int *len, unsigned int maxlen)
 {
   register unsigned short i;
-  unsigned char t;
+  int t;
+  char _r;
+  uint8_t _ck;
 
 
   // reset error status
@@ -22,44 +24,46 @@ unsigned char fnio_recv_buf(char *buf, unsigned int *len)
 
   // Get first length byte
   t = _serial_get_loop();
-  if (!t)
-	return(0);
-  *len = _r << 8;
+  if (t < 0)
+    return false;
+  *len = t << 8;
 
   // Get second length byte
   t = _serial_get_loop();
-  if (!t)
-  	return(0);
-  *len |= _r & 0xFF;
+  if (t < 0)
+    return false;
+  *len |= t & 0xFF;
 
-  if (*len > FNIO_TX_LEN_MAX)       // no more than LEN_MAX bytes
-	  *len = FNIO_TX_LEN_MAX;
+  if (*len > maxlen)
+    return false;
+
+  if (*len > FNIO_TX_LEN_MAX) // no more than LEN_MAX bytes
+    *len = FNIO_TX_LEN_MAX;
 
   // Now get the payload
   for (i=0; i<*len; ++i) {
-	  t = _serial_get_loop();
-	  if (!t)
-	  	return(0);
-   	buf[i] = _r;
+    t = _serial_get_loop();
+    if (t < 0)
+      return false;
+    buf[i] = t;
   }
 
   // Get the checksum
   t = _serial_get_loop();
-  if (!t)
-  	return(0);                            // timeout
+  if (t < 0)
+    return false;         // timeout
 
-  // checksum matches?
-  _checksum(buf, *len);
-  if (_r == _ck) {
-	  ser_put(FUJICMD_ACK);								  // ACK
-    ser_get((char *) &_r);                // get reflected data
-    return(1);                            // succes, checksum matches
+                          // checksum matches?
+  _ck = _checksum(buf, *len);
+  if (t == _ck) {
+    ser_put(FUJICMD_ACK); // ACK
+    ser_get(&_r);         // get reflected data
+    return true;          // succes, checksum matches
   }
-  else {
-	  _fn_error = FNIO_ERR_RECV_CHK;
-	  ser_put(FUJICMD_NAK); 								// NACK, checksum bad
-    ser_get((char *) &_r);                // get reflected data
-	  *len = 0;											        // return zero length
-    return(0);                            // checksum bad
-  }
+
+  _fn_error = FNIO_ERR_RECV_CHK;
+  ser_put(FUJICMD_NAK);   // NACK, checksum bad
+  ser_get(&_r);           // get reflected data
+  *len = 0;               // return zero length
+  return false;           // checksum bad
 }

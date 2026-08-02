@@ -62,6 +62,8 @@ dkms.conf
 *~
 \#*
 test
+test.*
+!test.c
 *.orig
 *.rej
 _cache/
