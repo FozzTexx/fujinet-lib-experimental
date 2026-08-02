@@ -100,7 +100,7 @@
 
 #endif /* BUILD_MSDOS */
 
-#ifdef BUILD_ADAM
+#if defined(BUILD_ADAM) || defined(BUILD_ADAM_CPM)
 #define FN_BROKEN_fuji_status
 #define FN_BROKEN_fuji_get_adapter_config
 #define FN_BROKEN_fuji_get_host_prefix
@@ -144,7 +144,7 @@
 #define FN_BROKEN_clock_get_time_tz
 #define FN_BROKEN_clock_get_tz
 #define FN_BROKEN_clock_set_tz
-#endif /* BUILD_ADAM */
+#endif /* BUILD_ADAM || BUILD_ADAM_CPM */
 
 #ifdef BUILD_C64
 #define FN_BROKEN_fuji_generate_guid
@@ -180,7 +180,7 @@
 //#define FN_BROKEN_fuji_hash_data
 #endif /* BUILD_APPLE2 */
 
-#ifdef BUILD_ADAM
+#if defined(BUILD_ADAM) || defined(BUILD_ADAM_CPM)
 // Missing from lib
 #define FN_BROKEN_fuji_set_appkey_details
 #define FN_BROKEN_fuji_write_appkey
@@ -193,7 +193,7 @@
 //#define FN_BROKEN_fuji_base64_encode_input
 //#define FN_BROKEN_fuji_hash_data
 #define FN_BROKEN_network_set_eol
-#endif /* BUILD_ADAM */
+#endif /* BUILD_ADAM || BUILD_ADAM_CPM */
 
 #ifdef BUILD_COCO
 // Missing from firmware
