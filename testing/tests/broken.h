@@ -13,6 +13,12 @@
  *   #define FN_BROKEN_network_http_put
  * ========================================================================= */
 
+// Building for Adam CP/M only defines __COLECOADAM__ but
+// fujinet-fuji.h only checks for __ADAM__
+#if FNLIB_VERSION_MAJOR < 5 && defined(__COLECOADAM__) && !defined(__ADAM__)
+#define __ADAM__
+#endif
+
 #include <fujinet-fuji.h>
 
 #if FNLIB_VERSION_MAJOR < 5

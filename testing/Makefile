@@ -61,7 +61,8 @@ CFLAGS_EXTRA = $(call include-dir-flag,$(TESTS_DIR))
 
 LIBS = $(call library-dir-flag,$(TESTS_LIB_DIR))
 LIBS_EXTRA_ADAM = $(call library-flag,$(TESTS_LIB).$(PLATFORM).lib)
-LIBS_EXTRA_ADAM_CPM = $(call library-flag,$(TESTS_LIB).$(PLATFORM).lib)
+LIBS_EXTRA_ADAM_CPM = $(call library-flag,$(TESTS_LIB).$(PLATFORM).lib) \
+	$(call library-flag,eos.lib) $(call library-flag,smartkeys.lib)
 LIBS_EXTRA_APPLE2 = $(call library-flag,$(TESTS_LIB).$(PLATFORM).lib)
 LIBS_EXTRA_ATARI = $(call library-flag,$(TESTS_LIB).$(PLATFORM).lib)
 LIBS_EXTRA_C64 = $(call library-flag,$(TESTS_LIB).$(PLATFORM).lib)
