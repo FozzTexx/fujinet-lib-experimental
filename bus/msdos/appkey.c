@@ -30,11 +30,11 @@ bool fuji_bus_appkey_read(void *string, uint16_t *length)
 
 bool fuji_bus_appkey_read(void *string, uint16_t *length)
 {
-  extern uint16_t fuji_bus_call_rlen;
   // Caller may not have room for length header so use our own buffer to read
-  if (!FUJICALL_RV(FUJICMD_READ_APPKEY, string, MAX_APPKEY_LEN))
+  if (!FUJICALL_RV(FUJICMD_READ_APPKEY, &appkey_buf, sizeof(appkey_buf)))
     return false;
-  *length = fuji_bus_call_rlen;
+  *length = appkey_buf.length;
+  memmove(string, appkey_buf.data, appkey_buf.length);
   return true;
 }
 #endif // MSDOS_VARIABLE_LENGTH_APPKEY_READ
