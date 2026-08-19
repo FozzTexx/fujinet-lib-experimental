@@ -11,6 +11,15 @@
 #include <string.h>
 #endif /* _CMOC_VERSION_ */
 
+/* These tests are built on primitives that are unavailable on some
+ * platforms with fujinet-lib 4.x, leaving nothing to exercise. */
+#if defined(FN_BROKEN_network_open) || defined(FN_BROKEN_network_close) \
+ || defined(FN_BROKEN_network_read) || defined(FN_BROKEN_network_http_put)
+#define FN_BROKEN_network_fs
+#endif
+
+#ifndef FN_BROKEN_network_fs
+
 /* IWM acknowledges every open at the bus level and reports the real result
  * through status, so network_open alone always looks successful there. */
 #ifdef BUILD_APPLE2
@@ -144,8 +153,15 @@ static int16_t fs_get(const char *devicespec)
   return r;
 }
 
+#endif /* ! FN_BROKEN_network_fs */
+
 void test_fs_make_test_dir(void)
 {
+#ifdef FN_BROKEN_network_fs
+  SECTION("network_fs_mkdir");
+  SKIP(network_fs);
+  END_OF_TEST();
+#else
   char guid[MAX_GUID_LEN];
   uint8_t err;
   bool ok;
@@ -203,10 +219,16 @@ void test_fs_make_test_dir(void)
   network_close(g.fs.path);
 
   END_OF_TEST();
+#endif
 }
 
-void test_fs_make_files(void)
+void test_fs_create_files(void)
 {
+#ifdef FN_BROKEN_network_fs
+  SECTION("network_fs: subdirectory and files");
+  SKIP(network_fs);
+  END_OF_TEST();
+#else
   int16_t count;
   uint8_t err;
 
@@ -247,10 +269,16 @@ void test_fs_make_files(void)
   TEST("delta.txt is listed", fs_listed("delta.txt"));
 
   END_OF_TEST();
+#endif
 }
 
 void test_fs_read_files(void)
 {
+#ifdef FN_BROKEN_network_fs
+  SECTION("network_fs: read back and overwrite");
+  SKIP(network_fs);
+  END_OF_TEST();
+#else
   SECTION("network_fs: read back and overwrite");
 
   fs_path("sub/alpha.txt");
@@ -263,10 +291,16 @@ void test_fs_read_files(void)
   TEST("beta.txt has the new contents", strcmp(g.fs.data, "beta-2") == 0);
 
   END_OF_TEST();
+#endif
 }
 
 void test_fs_rename_delete(void)
 {
+#ifdef FN_BROKEN_network_fs
+  SECTION("network_fs: rename and delete");
+  SKIP(network_fs);
+  END_OF_TEST();
+#else
   uint8_t err;
 
   SECTION("network_fs: rename and delete");
@@ -293,10 +327,16 @@ void test_fs_rename_delete(void)
   TEST("delta.txt is gone", !fs_listed("delta.txt"));
 
   END_OF_TEST();
+#endif
 }
 
 void test_fs_dir_lifecycle(void)
 {
+#ifdef FN_BROKEN_network_fs
+  SECTION("network_fs: mkdir and rmdir");
+  SKIP(network_fs);
+  END_OF_TEST();
+#else
   uint8_t err;
 
   SECTION("network_fs: mkdir and rmdir");
@@ -319,10 +359,16 @@ void test_fs_dir_lifecycle(void)
   network_close(g.fs.path);
 
   END_OF_TEST();
+#endif
 }
 
 void test_fs_lock_unlock(void)
 {
+#ifdef FN_BROKEN_network_fs
+  SECTION("network_fs: lock and unlock");
+  SKIP(network_fs);
+  END_OF_TEST();
+#else
   uint8_t err;
 
   SECTION("network_fs: lock and unlock");
@@ -338,4 +384,5 @@ void test_fs_lock_unlock(void)
   TEST("network_fs_unlock is accepted", err == FN_ERR_OK);
 
   END_OF_TEST();
+#endif
 }
