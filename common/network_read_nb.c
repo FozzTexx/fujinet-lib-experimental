@@ -2,10 +2,6 @@
 
 #include <fujinet-network.h>
 
-#ifndef _CMOC_VERSION_
-#include <stdio.h> // debug
-#endif
-
 #if !defined(__ADAM__) && !defined(__COLECOADAM__)
 int16_t network_read_nb(const char *devicespec, void *buf, uint16_t len)
 {

@@ -1,7 +1,3 @@
-#ifndef _CMOC_VERSION_
-#include <stdio.h> // debug
-#endif
-
 #include <fujinet-appkey.h>
 #include <fujinet-fuji.h>
 
@@ -34,10 +30,8 @@ void init_appkey(uint8_t key_id, uint8_t mode)
 bool fuji_read_appkey_common(uint8_t key_id, uint16_t *length, uint8_t *data)
 {
   init_appkey(key_id, 0);
-  if (!FUJICALL_D(FUJICMD_OPEN_APPKEY, &appkey, sizeof(appkey))) {
-    printf("appkey read open failed\n");
+  if (!FUJICALL_D(FUJICMD_OPEN_APPKEY, &appkey, sizeof(appkey)))
     return false;
-  }
   return fuji_bus_appkey_read(data, length);
 }
 
