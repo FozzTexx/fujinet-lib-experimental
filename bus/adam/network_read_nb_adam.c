@@ -20,22 +20,22 @@ int16_t network_read_nb_adam(const char *devicespec, void *buf, uint16_t len)
   if (!dcb)
     return 0;
 
-  /* Wait until the device actually has data and ask only for what it has.
-   * Reading blind returns an empty packet the caller cannot tell apart
-   * from a full one. */
-  do {
+  for (;;) {
+    status = dcb_io(dcb, DCB_COMMAND_READ, buf, len, MAX_RETRIES);
+    if (status != DCB_STATUS_FINISH)
+      return 0;
+
+    if (dcb->len)
+      return dcb->len;
+
+    /* An empty read means the device NACKed, which it only does with
+     * nothing staged, so asking for status here cannot discard queued
+     * data. Status is the only thing that tells "no data yet" apart from
+     * end of file, without which the caller's loop cannot terminate. */
     if (network_status(devicespec, &avail, &conn, &nerr) != FN_ERR_OK)
-      return -FN_ERR_IO_ERROR;
+      return 0;
 
     if (nerr > NETWORK_SUCCESS && !avail)
       return 0;
-  } while (!avail);
-
-  if (len > avail)
-    len = avail;
-
-  status = dcb_io(dcb, DCB_COMMAND_READ, buf, len, MAX_RETRIES);
-  if (status != DCB_STATUS_FINISH)
-    return 0;
-  return dcb->len;
+  }
 }

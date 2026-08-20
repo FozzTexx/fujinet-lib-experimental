@@ -82,7 +82,7 @@ uint8_t fuji_remap_device(uint8_t device)
  * the FujiNet side needs an explicit wait. The CoCo does the same thing
  * with FUJICMD_READY in its bus_ready(). Each failed poll costs one
  * AdamNet ACK timeout. */
-static bool bus_ready(DCB *dcb, uint_fast16_t retries)
+uint8_t bus_ready(DCB *dcb, uint_fast16_t retries)
 {
   while (retries--)
     if (dcb_io(dcb, DCB_COMMAND_STATUS, NULL, 0, 1) == DCB_STATUS_FINISH)
@@ -127,9 +127,6 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 
   status = dcb_io(dcb, DCB_COMMAND_WRITE, fb_packet, idx, MAX_RETRIES);
   if (status != DCB_STATUS_FINISH)
-    return false;
-
-  if (fuji_cmd == FUJICMD_COPY_FILE && !bus_ready(dcb, COPY_RETRIES))
     return false;
 
   if (fields & FUJI_FIELD_REPLY) {

@@ -63,5 +63,6 @@ extern DCB *dcb_find(uint8_t device);
 extern uint8_t dcb_io(DCB *dcb, uint8_t mode, void *buffer, size_t length,
 		      uint_fast16_t retries);
 extern uint8_t fuji_remap_device(uint8_t device);
+extern uint8_t bus_ready(DCB *dcb, uint_fast16_t retries);
 
 #endif /* FUJINET_BUS_ADAM_H */
