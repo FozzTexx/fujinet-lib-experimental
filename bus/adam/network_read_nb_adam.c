@@ -8,8 +8,6 @@ int16_t network_read_nb_adam(const char *devicespec, void *buf, uint16_t len)
   uint8_t device, nw_unit;
   uint8_t status;
   DCB *dcb;
-  uint16_t avail;
-  uint8_t conn, nerr;
 
 
   nw_unit = network_unit(devicespec);
@@ -20,21 +18,8 @@ int16_t network_read_nb_adam(const char *devicespec, void *buf, uint16_t len)
   if (!dcb)
     return 0;
 
-  for (;;) {
-    status = dcb_io(dcb, DCB_COMMAND_READ, buf, len, MAX_RETRIES);
-    if (status != DCB_STATUS_FINISH)
-      return 0;
-
-    if (dcb->len)
-      return dcb->len;
-
-    /* The device NAKs when data has merely not arrived yet, so status is
-     * what tells that apart from EOF. Nothing is staged after a NAK, so
-     * this cannot discard queued data. */
-    if (network_status(devicespec, &avail, &conn, &nerr) != FN_ERR_OK)
-      return 0;
-
-    if (nerr > NETWORK_SUCCESS && !avail)
-      return 0;
-  }
+  status = dcb_io(dcb, DCB_COMMAND_READ, buf, len, MAX_RETRIES);
+  if (status != DCB_STATUS_FINISH)
+    return 0;
+  return dcb->len;
 }
