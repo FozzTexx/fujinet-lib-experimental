@@ -77,11 +77,7 @@ uint8_t fuji_remap_device(uint8_t device)
   return device;
 }
 
-/* AdamNet completes a write once the packet has been delivered, not once
- * the device has acted on it, so a command that runs for a long time on
- * the FujiNet side needs an explicit wait. The CoCo does the same thing
- * with FUJICMD_READY in its bus_ready(). Each failed poll costs one
- * AdamNet ACK timeout. */
+/* AdamNet completes a write on delivery, not on completion. */
 uint8_t bus_ready(DCB *dcb, uint_fast16_t retries)
 {
   while (retries--)

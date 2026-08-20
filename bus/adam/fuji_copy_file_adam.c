@@ -1,14 +1,7 @@
 #include "fujinet-bus-adam.h"
 #include "fujinet-fuji.h"
 
-/**
- * @brief Copy a file between host slots, waiting for the copy to finish.
- *
- * AdamNet completes a write once the packet has been delivered, not once
- * the device has acted on it, so the copy would otherwise return while the
- * FujiNet was still working and the commands that followed would be lost.
- * The CoCo waits the same way with FUJICMD_READY in its bus_ready().
- */
+/* AdamNet completes a write on delivery, so wait for the copy to finish. */
 bool fuji_copy_file_adam(uint8_t src_slot, uint8_t dest_slot,
 			 const char *copy_spec)
 {

@@ -28,10 +28,9 @@ int16_t network_read_nb_adam(const char *devicespec, void *buf, uint16_t len)
     if (dcb->len)
       return dcb->len;
 
-    /* An empty read means the device NACKed, which it only does with
-     * nothing staged, so asking for status here cannot discard queued
-     * data. Status is the only thing that tells "no data yet" apart from
-     * end of file, without which the caller's loop cannot terminate. */
+    /* The device NAKs when data has merely not arrived yet, so status is
+     * what tells that apart from EOF. Nothing is staged after a NAK, so
+     * this cannot discard queued data. */
     if (network_status(devicespec, &avail, &conn, &nerr) != FN_ERR_OK)
       return 0;
 

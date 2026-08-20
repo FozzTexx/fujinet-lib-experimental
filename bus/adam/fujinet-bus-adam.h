@@ -5,11 +5,7 @@
 
 #define MAX_RETRIES 20
 
-/* FUJICMD_COPY_FILE runs entirely on the FujiNet side and answers nothing
- * until it is done. Measured throughput is around 13.5 KB/s over a remote
- * TNFS host, so a 256K Adam DDP takes roughly 20s, and more when the host
- * is retrying. At one 300ms AdamNet ACK timeout per poll this is the same
- * 120s budget the msdos driver gives the command. */
+/* The copy answers nothing until it finishes; one ACK timeout per poll. */
 #define COPY_RETRIES 400
 
 enum {
