@@ -3,6 +3,15 @@
 
 #include <stdint.h>
 
+#define MAX_RETRIES 20
+
+/* FUJICMD_COPY_FILE runs entirely on the FujiNet side and answers nothing
+ * until it is done. Measured throughput is around 13.5 KB/s over a remote
+ * TNFS host, so a 256K Adam DDP takes roughly 20s, and more when the host
+ * is retrying. At one 300ms AdamNet ACK timeout per poll this is the same
+ * 120s budget the msdos driver gives the command. */
+#define COPY_RETRIES 400
+
 enum {
   DCB_COMMAND_IDLE      = 0x00,
   DCB_COMMAND_STATUS    = 0x01,
@@ -51,7 +60,8 @@ typedef struct
 } DCB;
 
 extern DCB *dcb_find(uint8_t device);
-extern uint8_t dcb_io(DCB *dcb, uint8_t mode, void *buffer, size_t length);
+extern uint8_t dcb_io(DCB *dcb, uint8_t mode, void *buffer, size_t length,
+		      uint_fast16_t retries);
 extern uint8_t fuji_remap_device(uint8_t device);
 
 #endif /* FUJINET_BUS_ADAM_H */
