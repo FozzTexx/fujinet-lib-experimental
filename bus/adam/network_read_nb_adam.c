@@ -28,9 +28,8 @@ int16_t network_read_nb_adam(const char *devicespec, void *buf, uint16_t len)
     if (dcb->len)
       return dcb->len;
 
-    /* The device NAKs when there is no more data and ignores the request
-     * when data hasn't arrived yet, but the firmware NAKs for both, so
-     * status is what tells them apart. */
+    /* The device NAKs when there is no more data. It ignores the request
+     * when data hasn't arrived yet. */
     if (network_status(devicespec, &avail, &conn, &nerr) != FN_ERR_OK)
       return 0;
 
