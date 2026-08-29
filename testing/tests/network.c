@@ -574,3 +574,101 @@ void test_network_error_path(void)
 
   END_OF_TEST();
 }
+
+uint16_t wait_for_data(const char *net)
+{
+  uint16_t bw;
+  uint8_t conn, nerr, retry, err;
+
+#ifdef FN_BROKEN_network_status
+  SKIP(network_status);
+#else
+  for (retry = 0; retry < 10; retry++) {
+    bw = 0; conn = 0; nerr = 0;
+    err = network_status(net, &bw, &conn, &nerr);
+    if (err != FN_ERR_OK || bw > 0 || nerr != NETWORK_SUCCESS)
+      break;
+  }
+#endif
+
+  return bw;
+}
+
+void dual_echo_check(const char *net1, const char *net2, const uint8_t *msg)
+{
+  uint8_t err, retry;
+  int16_t r, w;
+  char test_name[40];
+
+#ifdef FN_BROKEN_network_write
+  SKIP(network_write);
+#else
+  w = strlen((const char *) msg);
+  err = network_write(net1, msg, w);
+#endif
+
+  r = wait_for_data(net1);
+  printf("  bytes_waiting=%u\n", r);
+  strcpy(test_name, "Nx has bytes waiting");
+  test_name[1] = net1[1];
+  TEST(test_name, r > 0);
+
+  r = wait_for_data(net2);
+  printf("  bytes_waiting=%u\n", r);
+  strcpy(test_name, "Nx DOES NOT have bytes waiting");
+  test_name[1] = net2[1];
+  TEST(test_name, r == 0);
+
+#ifdef FN_BROKEN_network_read
+  SKIP(network_read);
+#else
+  memset(g.net, 0, sizeof(g.net));
+  r = network_read(net1, g.net, w);
+  strcpy(test_name, "Nx network_read echoed data");
+  test_name[1] = net1[1];
+  TEST(test_name, r > 0);
+  if (r > 0) {
+    if (r > w + 1)
+      r = w + 1;
+    if (memcmp(g.net, msg, w) != 0)
+      cmp_hex("orig", msg, w, "recv", g.net, r);
+    strcpy(test_name, "Nx Echo matches sent message");
+    test_name[1] = net1[1];
+    TEST(test_name, memcmp(g.net, msg, w) == 0);
+  }
+#endif
+
+  return;
+}
+
+void test_multiple_network_devices(void)
+{
+  uint8_t err, err2 = FN_ERR_OK;
+  static const uint8_t msg[] = ECHO_MSG BASIC_LINE_ENDING;
+  static const uint8_t msg2[] = "ALT " ECHO_MSG BASIC_LINE_ENDING;
+
+  SECTION("multiple N: devices");
+
+#ifdef FN_BROKEN_network_open
+  SKIP(network_open);
+#else
+  err = network_open(NET_TCP_SPEC, OPEN_MODE_RW, OPEN_TRANS_LF);
+  err2 = network_open(NET2_ECHO, OPEN_MODE_RW, OPEN_TRANS_LF);
+  TEST("dual network_open (TCP RW) succeeds", err == FN_ERR_OK && err2 == FN_ERR_OK);
+#endif
+
+  // Write a message to N2 and make sure it doesn't come back on N1
+  dual_echo_check(NET2_ECHO, NET_TCP_SPEC, msg);
+
+  // Do the reverse, write to N1 and validate it is different than N2
+  dual_echo_check(NET_TCP_SPEC, NET2_ECHO, msg2);
+
+#ifdef FN_BROKEN_network_close
+  SKIP(network_close);
+#else
+  err = network_close(NET_TCP_SPEC);
+  err2 = network_close(NET2_ECHO);
+#endif
+
+  END_OF_TEST();
+}
