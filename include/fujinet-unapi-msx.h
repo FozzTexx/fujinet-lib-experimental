@@ -1,25 +1,21 @@
 #ifndef FUJINET_UNAPI_MSX_H
 #define FUJINET_UNAPI_MSX_H
 
-/* The MSX-UNAPI contract for reaching a FujiNet.
- *
- * This is the interface an implementation publishes and a client calls, so it
- * is shared between this library and the ROM side (the FujiNet MSX UNAPI
- * firmware, and the implementation carried in the Nextor driver bank).  Keep
+/* The MSX-UNAPI contract for reaching a FujiNet: what an implementation
+ * publishes and a client calls.  Shared with the ROM side - the FujiNet MSX
+ * UNAPI firmware, and the implementation in the Nextor driver bank - so keep
  * the two in step.
  */
 
 #include <fujinet-int.h>
 
-/* The API identifier an implementation answers to during EXTBIO discovery.
-   Identifiers are case insensitive. */
+/* The API identifier an implementation answers to during EXTBIO discovery;
+   identifiers are case insensitive. */
 #define FUJI_UNAPI_ID "FUJINET"
 
-/* The block routines FUJI_CALL_WRITE and FUJI_CALL_READ take in HL.
- *
- * The specification requires that a caller keep this block - and the buffer it
- * points at - out of page 1 and page 2: an implementation is free to page
- * itself in over either while the call runs.  Page 3 is the safe place.
+/* The block FUJI_CALL_WRITE and FUJI_CALL_READ take in HL.  The caller must
+ * keep it, and the buffer it points at, out of page 1 and page 2: an
+ * implementation is free to page itself in over either while the call runs.
  */
 typedef struct {
   uint8_t device;
@@ -30,25 +26,21 @@ typedef struct {
   uint16_t length;
 } FujiNetParams;
 
-/* Routine numbers, from the FujiNet Firmware UNAPI specification 1.0.  The
-   specification counts four routines but assigns nothing to 1, so 1 is left
-   out here rather than renumbering the two that follow it. */
+/* Routine numbers, from the FujiNet Firmware UNAPI specification 1.0, which
+   assigns nothing to 1. */
 enum {
   FUJI_CALL_INFO  = 0,
   FUJI_CALL_WRITE = 2,
   FUJI_CALL_READ  = 3,
 };
 
-/* How fuji_bus_call() reaches the implementation.
- *
- * Splitting this out is what lets the same library serve two very different
- * callers.  A program that is separate from the FujiNet gets the back end in
- * bus/msx/unapi/, which finds an implementation with EXTBIO and enters it with
- * an inter-slot call.  Code built *into* an implementation cannot do that - an
- * inter-slot call switches slots but not ROM banks, so it would re-enter its
- * own cartridge at the wrong bank - and supplies its own definition instead,
- * calling the routines directly.  Whichever definition is in the link wins;
- * the library module is only pulled in when nothing else defines this.
+/* How fuji_bus_call() reaches the implementation, and the seam that lets one
+ * library serve two callers.  A separate program links the back end in
+ * bus/msx/unapi/, which discovers an implementation and enters it with an
+ * inter-slot call.  Code built *into* an implementation cannot use that - an
+ * inter-slot call switches slots but not ROM banks - and defines this itself,
+ * calling the routines directly.  The library module is pulled in only when
+ * nothing else defines it.
  *
  * Out: 1 if the device answered, 0 if it did not.
  */

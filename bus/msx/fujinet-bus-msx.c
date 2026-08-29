@@ -36,12 +36,10 @@ static void hexdump(uint8_t *buffer, int count)
 }
 #endif /* HEXDUMP */
 
-/* Static rather than automatic only because there is no reason to build it on
-   the stack twice: fuji_unapi_call() moves it somewhere the implementation can
-   still see before it enters one.  Where this lands is not safe by itself - in
-   a ROM, BSS is page 3, but in an MSX-DOS .COM of any size it follows the
-   program up out of page 0 and into page 1, which is exactly the page CALSLT
-   is about to map the implementation over. */
+/* Static only to avoid building it on the stack twice: fuji_unapi_call() moves
+   it somewhere the implementation can see before entering one.  Where BSS
+   lands is not safe by itself - page 3 in a ROM, but page 1 in an MSX-DOS .COM
+   of any size. */
 static FujiNetParams params;
 
 bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
