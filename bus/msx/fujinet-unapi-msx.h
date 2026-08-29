@@ -36,8 +36,8 @@ enum {
 
 /* How fuji_bus_call() reaches the implementation, and the seam that lets one
  * library serve two callers.  A separate program links the back end in
- * bus/msx/unapi/, which discovers an implementation and enters it with an
- * inter-slot call.  Code built *into* an implementation cannot use that - an
+ * fujinet-unapi-extbio.c, which discovers an implementation and enters it with
+ * an inter-slot call.  Code built *into* an implementation cannot use that - an
  * inter-slot call switches slots but not ROM banks - and defines this itself,
  * calling the routines directly.  The library module is pulled in only when
  * nothing else defines it.
