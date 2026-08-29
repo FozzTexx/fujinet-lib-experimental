@@ -12,6 +12,40 @@
 
 #include "fujinet-unapi-msx.h"
 
+#include <string.h>
+
+/* How much stack to set aside for bouncing a caller's buffer out of a page the
+   implementation is about to map itself over.  A caller that keeps its buffers
+   where the specification says to never reaches this at all.
+ 
+   Two sizes rather than one, because the frame is only free if it is not
+   taken: a cartridge has its strings in ROM, which is page 1, so short
+   transfers hit this on every open - and a cartridge's stack is the few
+   hundred bytes between its BSS and HIMEM, which one big frame walks straight
+   through.  The small one covers a URL or a filename; the large one is only
+   entered by a caller that also put a whole data buffer in the way. */
+#ifndef FUJI_UNAPI_SMALL_BOUNCE
+#define FUJI_UNAPI_SMALL_BOUNCE 256
+#endif
+#ifndef FUJI_UNAPI_BOUNCE_SIZE
+#define FUJI_UNAPI_BOUNCE_SIZE 1024
+#endif
+
+/* The two pages an implementation is free to take over while a call runs:
+   CALSLT maps it into page 1 to enter it at all, and the FujiNet one pages
+   itself into page 2 as well to reach its window.  Anything it dereferences -
+   the parameter block, and the buffer that block points at - has to sit
+   outside both, which leaves page 0 and page 3. */
+#define IN_SWITCHED_PAGE(a) \
+  ((uint16_t) (a) >= 0x4000 && (uint16_t) (a) < 0xC000)
+
+/* The stack is where the bounce comes from, so it has to be page 3 itself.
+   It is on every caller worth the name - MSX-DOS puts it at the top of the
+   TPA and the BIOS puts it just under HIMEM - but a caller that has moved it
+   somewhere else would be quietly corrupted rather than told, so it is
+   checked rather than assumed. */
+#define STACK_IS_SAFE(a) ((uint16_t) (a) >= 0xC000)
+
 /* Discovery result, kept between calls.  unapi_entry doubles as the "have we
    looked yet" flag: an implementation's entry point is in page 1 or 2 and so
    is never zero. */
@@ -110,6 +144,83 @@ static uint8_t UNAPICall(void)
   return unapi_result;
 }
 
+static uint8_t enter(uint8_t func, FujiNetParams *params)
+{
+  call_func = func;
+  call_arg = params;
+  return UNAPICall();
+}
+
+/* Copy back what the implementation may have changed.  Everything but the
+   buffer pointer, which on the way in was ours and not the caller's. */
+static void unbounce(FujiNetParams *params, FujiNetParams *local, void *buffer)
+{
+  memcpy(params, local, sizeof(*params));
+  params->buffer = buffer;
+}
+
+/* The parameter block alone, moved to the stack.  This is the common case and
+   the one the library used to get wrong: the block is a static, and in a ROM
+   that lands in page 3 as the comment where it is declared says, but in an
+   MSX-DOS .COM of any size BSS follows the program up out of page 0 and into
+   page 1 - where the implementation is about to be. */
+static uint8_t bounce_block(uint8_t func, FujiNetParams *params)
+{
+  FujiNetParams local;
+  uint8_t ok;
+
+  if (!STACK_IS_SAFE(&local))
+    return enter(func, params); /* nowhere better to put it; no worse than not trying */
+
+  memcpy(&local, params, sizeof(local));
+  ok = enter(func, &local);
+  unbounce(params, &local, params->buffer);
+  return ok;
+}
+
+/* The block and the buffer it points at.  Only for a caller that put its
+   buffer somewhere the specification does not allow; the copy is the price of
+   not silently handing the implementation a pointer into its own ROM.  The
+   scratch belongs to the caller so that the frame it costs is chosen there. */
+static uint8_t bounce_via(uint8_t func, FujiNetParams *params, uint8_t *scratch)
+{
+  FujiNetParams local;
+  void *buffer = params->buffer;
+  uint16_t length = params->length;
+  uint8_t ok;
+
+  if (!STACK_IS_SAFE(&local) || !STACK_IS_SAFE(scratch))
+    return 0;
+
+  memcpy(&local, params, sizeof(local));
+  local.buffer = scratch;
+
+  if (func == FUJI_CALL_WRITE)
+    memcpy(scratch, buffer, length);
+
+  ok = enter(func, &local);
+
+  if (ok && func == FUJI_CALL_READ)
+    memcpy(buffer, scratch, local.length <= length ? local.length : length);
+
+  unbounce(params, &local, buffer);
+  return ok;
+}
+
+static uint8_t bounce_small(uint8_t func, FujiNetParams *params)
+{
+  uint8_t scratch[FUJI_UNAPI_SMALL_BOUNCE];
+
+  return bounce_via(func, params, scratch);
+}
+
+static uint8_t bounce_large(uint8_t func, FujiNetParams *params)
+{
+  uint8_t scratch[FUJI_UNAPI_BOUNCE_SIZE];
+
+  return bounce_via(func, params, scratch);
+}
+
 uint8_t fuji_unapi_call(uint8_t func, FujiNetParams *params)
 {
   if (!unapi_entry) {
@@ -123,7 +234,17 @@ uint8_t fuji_unapi_call(uint8_t func, FujiNetParams *params)
       return 0;
   }
 
-  call_func = func;
-  call_arg = params;
-  return UNAPICall();
+  /* A buffer the implementation cannot see is not something to paper over
+     quietly: it reads its own ROM instead, and what comes back looks like a
+     device that answered with nonsense rather than a caller that broke the
+     rules. Bounce it if it fits, and fail if it does not. */
+  if (params->length && params->buffer && IN_SWITCHED_PAGE(params->buffer)) {
+    if (params->length <= FUJI_UNAPI_SMALL_BOUNCE)
+      return bounce_small(func, params);
+    if (params->length <= FUJI_UNAPI_BOUNCE_SIZE)
+      return bounce_large(func, params);
+    return 0;
+  }
+
+  return bounce_block(func, params);
 }
