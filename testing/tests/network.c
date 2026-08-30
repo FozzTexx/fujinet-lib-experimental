@@ -577,7 +577,7 @@ void test_network_error_path(void)
 
 uint16_t wait_for_data(const char *net)
 {
-  uint16_t bw;
+  uint16_t bw = 0;
   uint8_t conn, nerr, retry, err;
 
 #ifdef FN_BROKEN_network_status
@@ -591,7 +591,7 @@ uint16_t wait_for_data(const char *net)
   }
 #endif
 
-  END_OF_TEST();
+fn_skipped:                                     \
   return bw;
 }
 
