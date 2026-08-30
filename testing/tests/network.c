@@ -580,9 +580,7 @@ uint16_t wait_for_data(const char *net)
   uint16_t bw = 0;
   uint8_t conn, nerr, retry, err;
 
-#ifdef FN_BROKEN_network_status
-  SKIP(network_status);
-#else
+#ifndef FN_BROKEN_network_status
   for (retry = 0; retry < 10; retry++) {
     bw = 0; conn = 0; nerr = 0;
     err = network_status(net, &bw, &conn, &nerr);
@@ -591,7 +589,6 @@ uint16_t wait_for_data(const char *net)
   }
 #endif
 
-fn_skipped:                                     \
   return bw;
 }
 
