@@ -591,6 +591,7 @@ uint16_t wait_for_data(const char *net)
   }
 #endif
 
+  END_OF_TEST();
   return bw;
 }
 
