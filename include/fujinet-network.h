@@ -89,6 +89,11 @@ FN_ERR network_close(const char* devicespec);
  * @return fujinet-network error code (See FN_ERR_* values)
  */
 FN_ERR network_open(const char* devicespec, uint8_t mode, uint8_t trans);
+#if FUJI_VARIABLE_LEN_PACKETS
+#define NETWORK_OPEN_LEN strlen(devicespec)
+#else
+#define NETWORK_OPEN_LEN MAX_FILENAME_LEN
+#endif /* FUJI_VARIABLE_LEN_PACKETS */
 
 /**
  * @brief  Non-blocking read from channel
