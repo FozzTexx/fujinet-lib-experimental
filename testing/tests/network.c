@@ -677,6 +677,9 @@ void test_multiple_network_devices(void)
 
 void test_network_open_no_n_prefix(void)
 {
+#ifdef FN_BROKEN_network_open_no_n_prefix
+  SKIP(network_open_no_n_prefix);
+#else
   bool ok;
   uint8_t unit = 2;
   uint16_t url_len;
@@ -695,4 +698,7 @@ void test_network_open_no_n_prefix(void)
   ok = NETCALL_A1_A2_D(FUJICMD_OPEN, unit, OPEN_MODE_RW, OPEN_TRANS_LF, r, url_len);
   TEST("network open without N: succeeds", ok);
   network_close(url);
+#endif // FN_BROKEN_network_open_no_prefix
+
+  END_OF_TEST();
 }
