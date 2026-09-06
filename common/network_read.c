@@ -1,5 +1,7 @@
 #include <fujinet-network.h>
 
+uint16_t fn_bytes_read;
+
 int16_t network_read(const char *devicespec, void *buf, uint16_t len)
 {
   int16_t total;
@@ -13,6 +15,7 @@ int16_t network_read(const char *devicespec, void *buf, uint16_t len)
       break;
   }
 
+  fn_bytes_read = total;
   if (!total && rlen < 0)
     return rlen;
   return total;

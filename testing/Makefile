@@ -1,4 +1,4 @@
-PRODUCTS = fnlib-test.lib flibtest fnettest fclktest fdsktest fqrctest fnfstest fapktest devlist
+PRODUCTS = fnlib-test.lib flibtest fnettest fnet2test fsgmltest fcaltest fregrtest fclktest fdsktest fqrctest fnfstest fapktest devlist
 PRODUCTS_DISK_NAME = fntests
 
 PLATFORMS += adam
@@ -41,6 +41,10 @@ fnlib-test.lib_SRC_DIRS = tests tests/%PLATFORM%
 MAIN_SRC_DIRS = src src/%PLATFORM%
 flibtest_SRC_DIRS = $(MAIN_SRC_DIRS)
 fnettest_SRC_DIRS = $(MAIN_SRC_DIRS)
+fnet2test_SRC_DIRS = $(MAIN_SRC_DIRS)
+fsgmltest_SRC_DIRS = $(MAIN_SRC_DIRS)
+fcaltest_SRC_DIRS = $(MAIN_SRC_DIRS)
+fregrtest_SRC_DIRS = $(MAIN_SRC_DIRS)
 fclktest_SRC_DIRS = $(MAIN_SRC_DIRS)
 fdsktest_SRC_DIRS = $(MAIN_SRC_DIRS)
 fqrctest_SRC_DIRS = $(MAIN_SRC_DIRS)
@@ -50,6 +54,10 @@ devlist_SRC_DIRS = $(MAIN_SRC_DIRS)
 
 flibtest_CFLAGS = -DFUJI_TESTS=1
 fnettest_CFLAGS = -DNETWORK_TESTS=1
+fnet2test_CFLAGS = -DNETWORK2_TESTS=1
+fsgmltest_CFLAGS = -DSGML_TESTS=1
+fcaltest_CFLAGS = -DCALMAIL_TESTS=1
+fregrtest_CFLAGS = -DREGRESSION_TESTS=1
 fclktest_CFLAGS = -DCLOCK_TESTS=1
 fdsktest_CFLAGS = -DDISK_TESTS=1
 fqrctest_CFLAGS = -DQRCODE_TESTS=1

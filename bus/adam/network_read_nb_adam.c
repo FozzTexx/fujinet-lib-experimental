@@ -11,6 +11,7 @@ int16_t network_read_nb_adam(const char *devicespec, void *buf, uint16_t len)
 
 
   nw_unit = network_unit(devicespec);
+  fn_bytes_read = 0;
   device = fuji_remap_device(nw_unit + FUJI_DEVICEID_NETWORK - 1);
   if (!device)
     return 0;
@@ -21,5 +22,6 @@ int16_t network_read_nb_adam(const char *devicespec, void *buf, uint16_t len)
   status = dcb_io(dcb, DCB_COMMAND_READ, buf, len, MAX_RETRIES);
   if (status != DCB_STATUS_FINISH)
     return 0;
-  return dcb->len;
+  fn_bytes_read = dcb->len;
+  return fn_bytes_read;
 }

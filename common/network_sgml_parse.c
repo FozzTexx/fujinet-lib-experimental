@@ -1,9 +1,9 @@
 #include <fujinet-network.h>
 
-FN_ERR network_json_parse(const char *devicespec)
+FN_ERR network_sgml_parse(const char *devicespec)
 {
   uint8_t nw_unit = network_unit(devicespec);
-  FN_ERR err = network_set_channel_mode(devicespec, NETWORK_CHANMODE_JSON);
+  FN_ERR err = network_set_channel_mode(devicespec, NETWORK_CHANMODE_SGML);
 
 
   if (err != FN_ERR_OK)

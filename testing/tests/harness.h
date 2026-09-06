@@ -32,6 +32,17 @@
       goto fn_skipped;                                                  \
     } while (0)
 
+/* SKIP with an arbitrary reason, and the FN_UNSUPPORTED_* variant for
+ * commands the firmware does not dispatch on this platform's bus. */
+#define SKIP_WHY(fn_name, why)                                          \
+    do {                                                                \
+      tests_skipped++;                                                  \
+      printf("SKIP  %s (%s)\n", #fn_name, why);                         \
+      goto fn_skipped;                                                  \
+    } while (0)
+
+#define SKIP_UNSUPPORTED(fn_name) SKIP_WHY(fn_name, "unsupported on this platform")
+
 #define SECTION(title) printf("\n--- %s ---\n", title)
 
 // Suppress cc65 warning about no goto

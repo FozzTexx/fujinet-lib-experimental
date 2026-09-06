@@ -2,16 +2,30 @@
 
 #include <fujinet-network.h>
 
+#if FUJI_VARIABLE_LEN_PACKETS
+#include <string.h>
+#endif /* FUJI_VARIABLE_LEN_PACKETS */
+
 #if !defined(__ADAM__) && !defined(__COLECOADAM__)
 int16_t network_json_query(const char *devicespec, const char *query, char *buffer)
 {
   int16_t total, read_len;
   FN_ERR err;
   uint16_t avail;
+  uint16_t query_len;
   uint8_t nw_unit = network_unit(devicespec);
 
 
-  if (!NETCALL_D(FUJICMD_QUERY, nw_unit, query, MAX_JSON_QUERY_LEN))
+#if FUJI_VARIABLE_LEN_PACKETS
+  query_len = strlen(query);
+  if (query_len > MAX_JSON_QUERY_LEN)
+    query_len = MAX_JSON_QUERY_LEN;
+#else
+  /* SIO/DriveWire expect a fixed-size query frame */
+  query_len = MAX_JSON_QUERY_LEN;
+#endif /* FUJI_VARIABLE_LEN_PACKETS */
+
+  if (!NETCALL_D(FUJICMD_QUERY, nw_unit, query, query_len))
     return -FN_ERR_IO_ERROR;
 
   total = 0;

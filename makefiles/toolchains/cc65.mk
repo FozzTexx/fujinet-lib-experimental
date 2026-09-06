@@ -32,7 +32,10 @@ define library-flag
   $1
 endef
 
+# Rebuild from scratch: ar65 a appends into an existing archive, which
+# keeps stale members around after a source file is renamed or removed
 define link-lib
+  $(RM) $1
   $(AR) a $1 $2
 endef
 
