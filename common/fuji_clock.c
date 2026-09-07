@@ -29,17 +29,19 @@ static uint8_t clk_result(bool ok)
   return ok ? FN_ERR_OK : FN_ERR_IO_ERROR;
 }
 
+#ifdef OBSOLETE
 static bool platform_clk_set_tz_call(uint8_t cmd, const char *tz)
 {
   size_t len = strlen(tz) + 1;
   return CLKCALL_B12_D(cmd, len, tz, len);
 }
+#endif /* OBSOLETE */
 
 /* ---- public API ---- */
 
 uint8_t clock_set_tz(const char *tz)
 {
-  return clk_result(platform_clk_set_tz_call(PLATFORM_TZCMD_MAIN, tz));
+  return clk_result(PLATFORM_CLK_SET_TZ_CALL(PLATFORM_TZCMD_MAIN, tz));
 }
 
 uint8_t clock_get_tz(char *tz)
@@ -69,7 +71,7 @@ uint8_t clock_get_time_tz(uint8_t *time_data, const char *tz, TimeFormat format)
   if ((uint8_t) format >= TIMEFORMAT_COUNT)
     return FN_ERR_BAD_CMD;
 
-  if (!platform_clk_set_tz_call(PLATFORM_TZCMD_ALT, tz))
+  if (!PLATFORM_CLK_SET_TZ_CALL(PLATFORM_TZCMD_ALT, tz))
     return FN_ERR_IO_ERROR;
   return clock_get_time_common(time_data, format, true);
 }

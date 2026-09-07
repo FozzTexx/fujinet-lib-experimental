@@ -48,12 +48,14 @@ typedef enum time_format_t {
 #define CLK_ALTIFYERIZE(cmd) tolower(cmd)
 #define PLATFORM_CLK_TIME_CALL(format, alt, buf, len) \
   CLKCALL_RV((alt) ? CLK_ALTIFYERIZE(clk_cmd[format]) : clk_cmd[format], buf, len)
+#define PLATFORM_CLK_SET_TZ_CALL(cmd, tz) CLKCALL_D(cmd, tz, strlen(tz) + 1)
 #define clock_get_time(time_data, format) clock_get_time_common(time_data, format, true)
 #else /* ! BUILD_APPLE_2 */
 #define PLATFORM_TZCMD_ALT   APETIMECMD_SETTZ
 #define PLATFORM_TZCMD_MAIN  APETIMECMD_SETTZ_ALT
 #define PLATFORM_CLK_TIME_CALL(format, alt, buf, len) \
   CLKCALL_A1_RV(clk_cmd[format], (alt) ? 1 : 0, buf, len)
+#define PLATFORM_CLK_SET_TZ_CALL(cmd, tz) CLKCALL_B12_D(cmd, strlen(tz), tz, strlen(tz))
 #define clock_get_time(time_data, format) clock_get_time_common(time_data, format, false)
 #endif /* BUILD_APPLE2 */
 
