@@ -48,21 +48,13 @@ typedef enum time_format_t {
 #define CLK_ALTIFYERIZE(cmd) tolower(cmd)
 #define PLATFORM_CLK_TIME_CALL(format, alt, buf, len) \
   CLKCALL_RV((alt) ? CLK_ALTIFYERIZE(clk_cmd[format]) : clk_cmd[format], buf, len)
-
-#define clock_set_tz clock_set_tz_apple2
-#define clock_get_tz clock_get_tz_apple2
-#define clock_get_time clock_get_time_apple2
-#define clock_get_time_tz clock_get_time_tz_apple2
+#define clock_get_time(time_data, format) clock_get_time_common(time_data, format, true)
 #else /* ! BUILD_APPLE_2 */
 #define PLATFORM_TZCMD_ALT   APETIMECMD_SETTZ
 #define PLATFORM_TZCMD_MAIN  APETIMECMD_SETTZ_ALT
 #define PLATFORM_CLK_TIME_CALL(format, alt, buf, len) \
   CLKCALL_A1_RV(clk_cmd[format], (alt) ? 1 : 0, buf, len)
-
-#define clock_set_tz clock_set_tz_default
-#define clock_get_tz clock_get_tz_default
-#define clock_get_time clock_get_time_default
-#define clock_get_time_tz clock_get_time_tz_default
+#define clock_get_time(time_data, format) clock_get_time_common(time_data, format, false)
 #endif /* BUILD_APPLE2 */
 
 /**
@@ -85,7 +77,7 @@ uint8_t clock_get_tz(char *tz);
  * @param  format a TimeFormat value to specify how the data should be returned.
  * @return fujinet status/error code (See FN_ERR_* values)
  */
-uint8_t clock_get_time(uint8_t *time_data, TimeFormat format);
+uint8_t clock_get_time_common(uint8_t *time_data, TimeFormat format, bool alt);
 
 /**
  * @brief  Get the current time in the format specified for the given timezone without affecting the system timezone.

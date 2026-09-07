@@ -1,3 +1,4 @@
+#ifdef OBSOLETE
 #include "fujinet-clock.h"
 
 #include <string.h>
@@ -39,3 +40,4 @@ uint8_t clock_get_time_tz_apple2(uint8_t *time_data, const char *tz, TimeFormat 
 {
   return clock_get_time_tz_common(time_data, tz, format);
 }
+#endif /* OBSOLETE */

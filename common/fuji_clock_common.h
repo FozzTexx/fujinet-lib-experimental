@@ -1,3 +1,4 @@
+#ifdef OBSOLETE
 /**
  * @brief Shared implementation logic for fuji_clock.c / fuji_clock_apple2.c
  * @license gpl v. 3, see LICENSE for details.
@@ -58,7 +59,7 @@ static uint8_t clock_get_time_common(uint8_t *time_data, TimeFormat format, bool
 
 static uint8_t clock_set_alternate_tz_common(const char *tz)
 {
-  return clk_result(platform_clk_set_tz_call(PLATFORM_TZCMD_ALT, tz));
+  return clk_result(
 }
 
 static uint8_t clock_set_tz_common(const char *tz)
@@ -70,8 +71,7 @@ static uint8_t clock_get_tz_common(char *tz)
 {
   uint8_t len;
 
-  if (!platform_clk_get_tz_len(&len))
-    return FN_ERR_IO_ERROR;
+  platform_clk_get_tz_len(&len);
   return clk_result(CLKCALL_RV(APETIMECMD_GET_GENERAL, tz, len));
 }
 
@@ -93,3 +93,4 @@ static uint8_t clock_get_time_tz_common(uint8_t *time_data, const char *tz, Time
 }
 
 #endif /* FUJI_CLOCK_COMMON_H */
+#endif /* OBSOLETE */
