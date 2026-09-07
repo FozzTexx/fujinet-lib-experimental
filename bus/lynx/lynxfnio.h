@@ -31,7 +31,6 @@ extern char _r;              // response/data from FN
 extern unsigned char _fn_error;
 extern uint16_t _lynx_len;   // length of last packet sent/received by fuji_bus_call
 
-
 // helper functions
 uint8_t _checksum(char *b, unsigned short len);
 int _serial_get_loop(void);
