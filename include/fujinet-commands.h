@@ -3,14 +3,18 @@
 
 enum {
   FUJICMD_RESET                         = 0xFF,
+  FUJICMD_GET_DSTATS_VALUE              = 0xFF, // network: aux1 = command byte to query
   FUJICMD_GET_SSID                      = 0xFE,
   FUJICMD_PASSWORD                      = 0xFE,
   FUJICMD_SCAN_NETWORKS                 = 0xFD,
   FUJICMD_USERNAME                      = 0xFD,
   FUJICMD_GET_SCAN_RESULT               = 0xFC,
   FUJICMD_JSON_MODE                     = 0xFC,
+  FUJICMD_CHANNEL_MODE                  = 0xFC, // network: firmware NET_CHANNEL_MODE
   FUJICMD_SET_SSID                      = 0xFB,
+  FUJICMD_SET_JSON_PARAMETERS           = 0xFB, // network: aux1 = 0 query flags / 1 line ending, aux2 = value
   FUJICMD_GET_WIFISTATUS                = 0xFA,
+  FUJICMD_SET_CHANNEL                   = 0xFA, // network: IWM unit select
   FUJICMD_MOUNT_HOST                    = 0xF9,
   FUJICMD_MOUNT_IMAGE                   = 0xF8,
   FUJICMD_OPEN_DIRECTORY                = 0xF7,
@@ -66,13 +70,22 @@ enum {
   FUJICMD_GENERATE_GUID                 = 0xBB,
   FUJICMD_GET_DEVICE1_FULLPATH          = 0xA0,
   FUJICMD_SET_STATUS                    = 0x81,
+  FUJICMD_QUERY_ALT                     = 0x81, // network: ComLynx alias of QUERY
+  FUJICMD_PARSE_ALT                     = 0x80, // network: ComLynx alias of PARSE
+  FUJICMD_GET_REMOTE                    = 0x72, // network: UDP remote "ip:port", FujiNet-PC only
+  FUJICMD_CLOSE_CLIENT                  = 0x63, // network: close accepted TCP client connection
+  FUJICMD_SET_TIMER_RATE                = 0x5A, // network: firmware NET_SET_INT_RATE
   FUJICMD_WRITE                         = 0x57,
+  FUJICMD_SET_TRANSLATION               = 0x54, // network: firmware NET_TRANSLATION
   FUJICMD_STATUS                        = 0x53,
   FUJICMD_READ                          = 0x52,
   FUJICMD_QUERY                         = 0x51,
   FUJICMD_PARSE                         = 0x50,
   FUJICMD_OPEN                          = 0x4F,
   FUJICMD_SET_MODE                      = 0x4D,
+  FUJICMD_SET_EOL                       = 0x4C, // network: alias of NETCMD_SET_EOL
+  FUJICMD_GET_ERROR                     = 0x45, // network: AdamNet-only extended error
+  FUJICMD_SET_DESTINATION               = 0x44, // network: UDP destination "host:port"
   FUJICMD_CLOSE                         = 0x43,
   FUJICMD_ACCEPT                        = 0x41,
   FUJICMD_GETCWD                        = 0x30,

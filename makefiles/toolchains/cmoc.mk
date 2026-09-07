@@ -35,7 +35,9 @@ define library-flag
   -l$1
 endef
 
+# Rebuild from scratch so stale members do not survive file renames
 define link-lib
+  $(RM) $@
   $(AR) -a -r $@ $^
 endef
 

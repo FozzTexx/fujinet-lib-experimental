@@ -10,6 +10,7 @@ int16_t network_read_nb(const char *devicespec, void *buf, uint16_t len)
 
 
   nw_unit = network_unit(devicespec);
+  fn_bytes_read = 0;
 
   do {
     // Check how many bytes are available
@@ -24,6 +25,7 @@ int16_t network_read_nb(const char *devicespec, void *buf, uint16_t len)
   if (len > nw_status.avail)
     len = nw_status.avail;
 
-  return network_bus_read(FUJI_DEVICEID_NETWORK + nw_unit - 1, buf, len);
+  fn_bytes_read = network_bus_read(FUJI_DEVICEID_NETWORK + nw_unit - 1, buf, len);
+  return fn_bytes_read;
 }
 #endif /* ! (__ADAM__ || __COLECOADAM__) */
