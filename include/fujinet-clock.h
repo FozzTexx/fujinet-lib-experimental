@@ -42,11 +42,23 @@ typedef enum time_format_t {
 #define CLK_CMD_SIMPLE_BINARY_WITH_HUNDREDTHS APETIMECMD_GET_SIMPLE_HUNDREDTHS
 
 #ifdef BUILD_APPLE2
+#include <ctype.h>
+#define PLATFORM_TZCMD_ALT   APETIMECMD_SETTZ_ALT
+#define PLATFORM_TZCMD_MAIN  APETIMECMD_SETTZ_ALT2
+#define CLK_ALTIFYERIZE(cmd) tolower(cmd)
+#define PLATFORM_CLK_TIME_CALL(format, alt, buf, len) \
+  CLKCALL_RV((alt) ? CLK_ALTIFYERIZE(clk_cmd[format]) : clk_cmd[format], buf, len)
+
 #define clock_set_tz clock_set_tz_apple2
 #define clock_get_tz clock_get_tz_apple2
 #define clock_get_time clock_get_time_apple2
 #define clock_get_time_tz clock_get_time_tz_apple2
 #else /* ! BUILD_APPLE_2 */
+#define PLATFORM_TZCMD_ALT   APETIMECMD_SETTZ
+#define PLATFORM_TZCMD_MAIN  APETIMECMD_SETTZ_ALT
+#define PLATFORM_CLK_TIME_CALL(format, alt, buf, len) \
+  CLKCALL_A1_RV(clk_cmd[format], (alt) ? 1 : 0, buf, len)
+
 #define clock_set_tz clock_set_tz_default
 #define clock_get_tz clock_get_tz_default
 #define clock_get_time clock_get_time_default
