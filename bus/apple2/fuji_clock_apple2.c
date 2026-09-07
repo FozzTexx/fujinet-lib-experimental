@@ -1,55 +1,64 @@
-#include "fujinet-clock.h"
-
+#include "fuji_clock_common.h"
+#ifdef UNUSED
+#include <fujinet-clock.h>
 #include <string.h>
 #include <ctype.h>
+#endif /* UNUSED */
 
-#define CLK_ALTIFYERIZE(cmd) tolower(cmd)
+#define PLATFORM_CLK_TIME_CALL(format, alt, buf, len) \
+  CLKCALL_RV((alt) ? CLK_ALTIFYERIZE(clk_cmd[format]) : clk_cmd[format], buf, len)
 
-extern const uint8_t clk_reply_len[TIMEFORMAT_COUNT];
-extern const uint8_t *clk_cmd;
-
-
-static uint8_t clock_set_alternate_tz(const char *tz)
+static uint8_t clock_set_alternate_tz_apple2(const char *tz)
 {
-  return CLKCALL_D(APETIMECMD_SETTZ_ALT, tz, strlen(tz) + 1) ? FN_ERR_OK : FN_ERR_IO_ERROR;
+  return clk_result(CLKCALL_D(APETIMECMD_SETTZ_ALT, tz, strlen(tz) + 1));
 }
 
-uint8_t clock_set_tz(const char *tz)
+uint8_t clock_set_tz_apple2(const char *tz)
 {
-  return CLKCALL_D(APETIMECMD_SETTZ_ALT2, tz, strlen(tz) + 1) ? FN_ERR_OK : FN_ERR_IO_ERROR;
+  return clk_result(CLKCALL_D(APETIMECMD_SETTZ_ALT2, tz, strlen(tz) + 1));
 }
 
-uint8_t clock_get_tz(char *tz)
+uint8_t clock_get_tz_apple2(char *tz)
 {
-  return CLKCALL_RV(APETIMECMD_GET_GENERAL, tz, 64) ? FN_ERR_OK : FN_ERR_IO_ERROR;
+  return clk_result(CLKCALL_RV(APETIMECMD_GET_GENERAL, tz, 64));
 }
 
-uint8_t clock_get_time(uint8_t *time_data, TimeFormat format)
+uint8_t clock_get_time_apple2(uint8_t *time_data, TimeFormat format)
 {
-  bool success;
-
-
-  if ((uint8_t) format >= TIMEFORMAT_COUNT)
-    return FN_ERR_BAD_CMD;
-  success = CLKCALL_RV(clk_cmd[format], time_data, clk_reply_len[format]);
-  if (success)
-    time_data[clk_reply_len[format]] = 0;
-  return success ? FN_ERR_OK : FN_ERR_IO_ERROR;
+  return clock_get_time_common(time_data, format, false);
 }
 
-uint8_t clock_get_time_tz(uint8_t *time_data, const char *tz, TimeFormat format)
+uint8_t clock_get_time_tz_apple2(uint8_t *time_data, const char *tz, TimeFormat format)
 {
-  uint8_t rc;
-  bool success;
+  return clock_get_time_tz_common(time_data, tz, format);
+}
+#define PLATFORM_TZCMD_ALT   APETIMECMD_SETTZ_ALT
+#define PLATFORM_TZCMD_MAIN  APETIMECMD_SETTZ_ALT2
 
+static bool platform_clk_set_tz_call(uint8_t cmd, const char *tz)
+{
+  return CLKCALL_D(cmd, tz, strlen(tz) + 1);
+}
 
-  if ((uint8_t) format >= TIMEFORMAT_COUNT)
-    return FN_ERR_BAD_CMD;
-  rc = clock_set_alternate_tz(tz);
-  if (rc != FN_ERR_OK)
-    return rc;
-  success = CLKCALL_RV(CLK_ALTIFYERIZE(clk_cmd[format]), time_data, clk_reply_len[format]);
-  if (success)
-    time_data[clk_reply_len[format]] = 0;
-  return success ? FN_ERR_OK : FN_ERR_IO_ERROR;
+static bool platform_clk_get_tz_len(uint8_t *len_out)
+{
+  *len_out = 64;
+  return true;
+}
+
+#include "fuji_clock_common.h"
+
+static uint8_t clock_set_alternate_tz_apple2(const char *tz)
+{
+  return clock_set_alternate_tz_common(tz);
+}
+
+uint8_t clock_set_tz_apple2(const char *tz)
+{
+  return clock_set_tz_common(tz);
+}
+
+uint8_t clock_get_tz_apple2(char *tz)
+{
+  return clock_get_tz_common(tz);
 }

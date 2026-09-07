@@ -41,6 +41,18 @@ typedef enum time_format_t {
 #define CLK_CMD_APPLE3_SOS_BINARY  APETIMECMD_GET_SOS
 #define CLK_CMD_SIMPLE_BINARY_WITH_HUNDREDTHS APETIMECMD_GET_SIMPLE_HUNDREDTHS
 
+#ifdef BUILD_APPLE2
+#define clock_set_tz clock_set_tz_apple2
+#define clock_get_tz clock_get_tz_apple2
+#define clock_get_time clock_get_time_apple2
+#define clock_get_time_tz clock_get_time_tz_apple2
+#else /* ! BUILD_APPLE_2 */
+#define clock_set_tz clock_set_tz_default
+#define clock_get_tz clock_get_tz_default
+#define clock_get_time clock_get_time_default
+#define clock_get_time_tz clock_get_time_tz_default
+#endif /* BUILD_APPLE2 */
+
 /**
  * @brief  Set the FN clock's system timezone
  * @param  tz the timezone string to apply
