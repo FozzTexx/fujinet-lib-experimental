@@ -1,11 +1,15 @@
 #include <stdio.h> // debug
 
 #include "portio.h"
+#include <fujinet-bus.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
-#undef DEBUG
+#define DEBUG
+#define HEXDUMP 1
+
+static void hexdump(void *ptr, int count);
 
 #define TIMEOUT_SLOW	(15 * PORT_TICKS_PER_SECOND)
 
@@ -46,7 +50,6 @@ typedef struct {
 } fujibus_packet;
 
 static const uint8_t fuji_field_numbytes_table[] = {0, 1, 2, 3, 4, 2, 4, 4};
-#define fuji_field_numbytes(descr) fuji_field_numbytes_table[descr]
 
 static bool port_did_init = false;
 
@@ -86,6 +89,7 @@ static uint8_t fuji_packet_call(AtariSIODirection direction, fujibus_packet *pac
   if (direction == SIO_DIRECTION_WRITE)
     ck1 = fuji_calc_checksum(pbuf, plen, ck1);
   packet_ptr->header.checksum = ck1;
+  hexdump(packet_ptr, sizeof(fujibus_packet));
 
   port_putc(SLIP_END);
   port_putbuf_slip(packet_ptr, aux_len + sizeof(packet_ptr->header));
@@ -102,7 +106,7 @@ static uint8_t fuji_packet_call(AtariSIODirection direction, fujibus_packet *pac
   if (rlen < sizeof(fujibus_header) || rlen != packet_ptr->header.length) {
 #ifdef DEBUG
     printf("Reply length incorrect: %d %d\n", rlen, packet_ptr->header.length);
-    hexdump((uint8_t *) &fb_packet, sizeof(fujibus_header));
+    hexdump((uint8_t *) packet_ptr, sizeof(fujibus_header));
 #endif /* DEBUG */
     success = false;
     goto done;
@@ -110,7 +114,7 @@ static uint8_t fuji_packet_call(AtariSIODirection direction, fujibus_packet *pac
 #ifdef DEBUG
   if (rlen - sizeof(fujibus_header) != plen) {
     printf("Expected length incorrect: %d %d\n", rlen - sizeof(fujibus_header), plen);
-    hexdump((uint8_t *) params, sizeof(*params));
+    hexdump((uint8_t *) packet_ptr, sizeof(fujibus_header));
   }
 #endif /* DEBUG */
 
@@ -134,8 +138,8 @@ static uint8_t fuji_packet_call(AtariSIODirection direction, fujibus_packet *pac
 
   if (packet_ptr->header.device != pdev) {
 #ifdef DEBUG
-    printf("Incorrect device: R:0x%02x E:0x%02x\n", fb_packet.header.device, pdev);
-    hexdump((uint8_t *) &fb_packet, sizeof(fb_packet.header));
+    printf("Incorrect device: R:0x%02x E:0x%02x\n", packet_ptr->header.device, pdev);
+    hexdump((uint8_t *) packet_ptr, sizeof(packet_ptr->header));
 #endif /* DEBUG */
     success = false;
     goto done;
@@ -143,13 +147,13 @@ static uint8_t fuji_packet_call(AtariSIODirection direction, fujibus_packet *pac
 
   if (packet_ptr->header.command != PACKET_ACK) {
 #ifdef DEBUG
-    printf("Not ACK: 0x%02x\n", fb_packet.header.command);
+    printf("Not ACK: 0x%02x\n", packet_ptr->header.command);
 #endif /* DEBUG */
     success = false;
     goto done;
   }
 
-  // FIXME - validate that fb_packet.fields is zero?
+  // FIXME - validate that packet_ptr->fields is zero?
 
   success = true;
 
@@ -159,15 +163,24 @@ static uint8_t fuji_packet_call(AtariSIODirection direction, fujibus_packet *pac
 
 bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 		   uint8_t aux1, uint8_t aux2, uint8_t aux3, uint8_t aux4,
-		   const void *data, size_t data_length,
-		   void *reply, size_t reply_length)
+		   const void *buf, size_t buf_length)
 {
   int code;
   uint8_t ck1, ck2;
   uint16_t rlen;
   uint16_t idx, numbytes;
   fujibus_packet fb_packet;
+  AtariSIODirection direction;
 
+
+  if (device != FUJI_DEVICEID_FUJINET) {
+    printf("Device  = 0x%02x\n", device);
+    printf("Command = 0x%02x\n", fuji_cmd);
+    printf("Fields  = 0x%02x\n", fields);
+    printf("AUX     = 0x%02x 0x%02x 0x%02x 0x%02x\n", aux1, aux2, aux3, aux4);
+    printf("Buf len = %d\n", buf_length);
+    exit(1);
+  }
 
   fb_packet.header.device = device;
   fb_packet.header.command = fuji_cmd;
@@ -177,37 +190,27 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
 
   idx = 0;
   numbytes = fuji_field_numbytes(fields);
-  if (numbytes) {
+  if (numbytes > 0)
     fb_packet.data[idx++] = aux1;
-    numbytes--;
-  }
-  if (numbytes) {
+  if (numbytes > 1)
     fb_packet.data[idx++] = aux2;
-    numbytes--;
-  }
-  if (numbytes) {
+  if (numbytes > 2)
     fb_packet.data[idx++] = aux3;
-    numbytes--;
-  }
-  if (numbytes) {
+  if (numbytes > 3)
     fb_packet.data[idx++] = aux4;
-    numbytes--;
-  }
 
-  if (reply)
-    return fuji_packet_call(SIO_DIRECTION_READ, &fb_packet, reply, reply_length);
-  return fuji_packet_call(SIO_DIRECTION_WRITE, &fb_packet, data, data_length);
+  direction = fields & FUJI_FIELD_REPLY ? SIO_DIRECTION_READ : SIO_DIRECTION_WRITE;
+  return fuji_packet_call(direction, &fb_packet, buf, buf_length);
 }
-
-#define HEXDUMP 1
 
 #if defined(DEBUG) && defined(HEXDUMP)
 #define COLUMNS 16
 
-static void hexdump(uint8_t *buffer, int count)
+static void hexdump(void *ptr, int count)
 {
   int outer, inner;
   uint8_t c;
+  uint8_t *buffer = (uint8_t *) ptr;
 
 
   for (outer = 0; outer < count; outer += COLUMNS) {
