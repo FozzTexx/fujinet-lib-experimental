@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define DEBUG
+#undef DEBUG
 #define HEXDUMP 1
 
 static void hexdump(void *ptr, int count);
@@ -59,11 +59,8 @@ static uint16_t fuji_calc_checksum(const void *ptr, uint16_t len, uint16_t seed)
   uint8_t *buf = (uint8_t *) ptr;
 
 
-  for (idx = 0, chk = seed; idx < len; idx++) {
-    printf("CHECK 0x%04x 0x%02x\n", chk, buf[idx]);
+  for (idx = 0, chk = seed; idx < len; idx++)
     chk = ((chk + buf[idx]) >> 8) + ((chk + buf[idx]) & 0xFF);
-  }
-  printf("FINAL 0x%02x\n", chk);
   return chk;
 }
 
@@ -92,7 +89,9 @@ static uint8_t fuji_packet_call(AtariSIODirection direction, fujibus_packet *pac
   if (direction == SIO_DIRECTION_WRITE)
     ck1 = fuji_calc_checksum(pbuf, plen, ck1);
   packet_ptr->header.checksum = ck1;
+#ifdef DEBUG
   hexdump(packet_ptr, sizeof(fujibus_header));
+#endif /* DEBUG */
 
   port_putc(SLIP_END);
   port_putbuf_slip(packet_ptr, aux_len + sizeof(packet_ptr->header));
@@ -128,10 +127,14 @@ static uint8_t fuji_packet_call(AtariSIODirection direction, fujibus_packet *pac
 
   // Data is spread across two buffers: packet_ptr and pbuf
   ck2 = fuji_calc_checksum(packet_ptr, sizeof(packet_ptr->header), 0);
+#ifdef DEBUG
   printf("CK2_A = 0x%02x\n", ck2);
+#endif /* DEBUG */
   if (direction == SIO_DIRECTION_READ)
     ck2 = fuji_calc_checksum(pbuf, rlen - sizeof(packet_ptr->header), ck2);
+#ifdef DEBUG
   printf("CK2_B = 0x%02x\n", ck2);
+#endif /* DEBUG */
 
   if (ck1 != ck2) {
 #ifdef DEBUG
