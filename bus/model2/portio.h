@@ -1,7 +1,7 @@
 #include <stdint.h>
 
 #define PORT_INIT() port_init(1, 16);
-#define PORT_TICKS_PER_SECOND 50000
+#define PORT_TICKS_PER_SECOND 1000
 
 extern void __CALLEE__ port_init(uint8_t ctc_divisor, uint8_t sio_divisor);
 

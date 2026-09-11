@@ -59,8 +59,11 @@ static uint16_t fuji_calc_checksum(const void *ptr, uint16_t len, uint16_t seed)
   uint8_t *buf = (uint8_t *) ptr;
 
 
-  for (idx = 0, chk = seed; idx < len; idx++)
+  for (idx = 0, chk = seed; idx < len; idx++) {
+    printf("CHECK 0x%04x 0x%02x\n", chk, buf[idx]);
     chk = ((chk + buf[idx]) >> 8) + ((chk + buf[idx]) & 0xFF);
+  }
+  printf("FINAL 0x%02x\n", chk);
   return chk;
 }
 
@@ -89,7 +92,7 @@ static uint8_t fuji_packet_call(AtariSIODirection direction, fujibus_packet *pac
   if (direction == SIO_DIRECTION_WRITE)
     ck1 = fuji_calc_checksum(pbuf, plen, ck1);
   packet_ptr->header.checksum = ck1;
-  hexdump(packet_ptr, sizeof(fujibus_packet));
+  hexdump(packet_ptr, sizeof(fujibus_header));
 
   port_putc(SLIP_END);
   port_putbuf_slip(packet_ptr, aux_len + sizeof(packet_ptr->header));
@@ -107,6 +110,7 @@ static uint8_t fuji_packet_call(AtariSIODirection direction, fujibus_packet *pac
 #ifdef DEBUG
     printf("Reply length incorrect: %d %d\n", rlen, packet_ptr->header.length);
     hexdump((uint8_t *) packet_ptr, sizeof(fujibus_header));
+    hexdump(pbuf, rlen);
 #endif /* DEBUG */
     success = false;
     goto done;
@@ -124,13 +128,16 @@ static uint8_t fuji_packet_call(AtariSIODirection direction, fujibus_packet *pac
 
   // Data is spread across two buffers: packet_ptr and pbuf
   ck2 = fuji_calc_checksum(packet_ptr, sizeof(packet_ptr->header), 0);
+  printf("CK2_A = 0x%02x\n", ck2);
   if (direction == SIO_DIRECTION_READ)
     ck2 = fuji_calc_checksum(pbuf, rlen - sizeof(packet_ptr->header), ck2);
-  ck2 = (uint8_t) ck2;
+  printf("CK2_B = 0x%02x\n", ck2);
 
   if (ck1 != ck2) {
 #ifdef DEBUG
-    printf("Checksum mismatch: 0x%02x 0x%02x\n", ck1, ck2);
+    printf("Checksum mismatch: 0x%02x 0x%02x rlen=%d dir=0x%02x\n", ck1, ck2, rlen, direction);
+    hexdump(packet_ptr, sizeof(fujibus_header));
+    exit(1);
 #endif /* DEBUG */
     success = false;
     goto done;
@@ -173,6 +180,7 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
   AtariSIODirection direction;
 
 
+#ifdef UNUSED
   if (device != FUJI_DEVICEID_FUJINET) {
     printf("Device  = 0x%02x\n", device);
     printf("Command = 0x%02x\n", fuji_cmd);
@@ -181,6 +189,7 @@ bool fuji_bus_call(uint8_t device, uint8_t fuji_cmd, uint8_t fields,
     printf("Buf len = %d\n", buf_length);
     exit(1);
   }
+#endif /* UNUSED */
 
   fb_packet.header.device = device;
   fb_packet.header.command = fuji_cmd;

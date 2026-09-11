@@ -8,7 +8,9 @@
 ; Destroys: F, HL
 ;-----------------------------------------------------------------------------
 SLIPD_WAIT_CHAR macro timeout_label
+	push	bc
 	call	_port_getc_timeout
+	pop	bc
 	ld	a,h		; check high byte
 	or	a
 	jr	nz,timeout_label	; if high byte is set then timed out
