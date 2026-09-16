@@ -88,10 +88,12 @@ static uint8_t status_err(const char *spec)
  * network_json_parse() cannot reach this: it sends SET_PARSER itself, and
  * fujidev_set_parser happily builds a JSONParser around a null protocol. The
  * null-_parser guard only sees a bare NET_PARSE. */
+#ifndef FN_BROKEN_bare_net_parse
 static bool bare_parse(const char *spec)
 {
   return NETCALL(NETCMD_PARSE, network_unit(spec));
 }
+#endif /* FN_BROKEN_bare_net_parse */
 
 void test_parse_no_parser(void)
 {
@@ -100,7 +102,7 @@ void test_parse_no_parser(void)
 
   SECTION("NET_PARSE with no channel open");
 
-#ifdef FN_BROKEN_parse_errors
+#if defined(FN_BROKEN_parse_errors) || defined(FN_BROKEN_bare_net_parse)
   SKIP(parse_errors);
 #else
   /* Whatever ran before us, make sure unit 1 has nothing bound. close()
@@ -129,7 +131,8 @@ void test_parse_after_close(void)
 
   SECTION("NET_PARSE after NET_CLOSE");
 
-#if defined(FN_BROKEN_parse_errors) || defined(FN_BROKEN_network_json_parse)
+#if defined(FN_BROKEN_parse_errors) || defined(FN_BROKEN_network_json_parse) \
+  || defined(FN_BROKEN_bare_net_parse)
   SKIP(parse_errors);
 #else
   err = network_open(NET_JSON_URL, OPEN_MODE_HTTP_GET, OPEN_TRANS_NONE);
@@ -162,7 +165,8 @@ void test_parse_parser_none(void)
 
   SECTION("NET_PARSE in PARSER_NONE mode");
 
-#if defined(FN_BROKEN_parse_errors) || defined(FN_BROKEN_network_set_parser)
+#if defined(FN_BROKEN_parse_errors) || defined(FN_BROKEN_network_set_parser) \
+  || defined(FN_BROKEN_bare_net_parse)
   SKIP(parse_errors);
 #else
   err = network_open(NET_JSON_URL, OPEN_MODE_HTTP_GET, OPEN_TRANS_NONE);
