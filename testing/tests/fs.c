@@ -1,19 +1,3 @@
-/**
- * @file fs.c
- * @brief network_fs_* and directory-listing tests over N:.
- *
- * Firmware regression commits exercised here (fujinet-firmware):
- *   PR #1652  fnFTP::read_directory -> test_fs_ftp_listing().
- *             A LIST reply that ends in a blank line spun open_dir()
- *             forever, the last entry was dropped when parsing it hit
- *             EOF, and a symlink kept its " -> target" suffix.
- *
- * WARNING: against firmware older than #1652, test_fs_ftp_listing() wedges
- * the FujiNet -- it sits in that infinite loop and never answers, so the
- * test times out and the device needs a reset. That is the bug reproducing,
- * not a fault in the test.
- */
-
 #include "broken.h"
 
 #include "harness.h"
@@ -452,9 +436,6 @@ void test_fs_lock_unlock(void)
 #endif
 }
 
-/* FTP directory listing (fujinet-firmware #1652). Read-only against a
- * public anonymous server, so unlike the rest of this file it creates
- * nothing and cleans nothing up. */
 void test_fs_ftp_listing(void)
 {
   int16_t count;
@@ -469,8 +450,6 @@ void test_fs_ftp_listing(void)
   printf("  contents of %s\n", FTP_HOST);
   count = fs_list(FTP_ROOT);
 
-  /* Before #1652 the firmware never answers this open -- it is still
-   * appending empty entries to its own buffer. */
   TEST("FTP directory listing is not empty", count > 0);
 
   /* welcome.msg sorts last, and the last entry was what the old
@@ -478,12 +457,8 @@ void test_fs_ftp_listing(void)
   TEST("the last entry is not dropped", fs_listed("welcome.msg"));
   TEST("a plain file is listed", fs_listed("robots.txt"));
 
-  /* A symlink to a directory. The old code left the name as
-   * "breakpoint -> users/breakpoint/". */
   TEST("a symlink keeps its own name", fs_listed("breakpoint/"));
 
-  /* The UNIX "total" header and anything else ftpparse rejects used to
-   * come back as an entry literally named "???". */
   TEST("no entry is named ???", !fs_listed("???"));
 
   /* Without this the checks above would pass even if the open succeeded
