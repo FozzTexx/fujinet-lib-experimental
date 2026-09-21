@@ -1,3 +1,19 @@
+/**
+ * @file fs.c
+ * @brief network_fs_* and directory-listing tests over N:.
+ *
+ * Firmware regression commits exercised here (fujinet-firmware):
+ *   PR #1652  fnFTP::read_directory -> test_fs_ftp_listing().
+ *             A LIST reply that ends in a blank line spun open_dir()
+ *             forever, the last entry was dropped when parsing it hit
+ *             EOF, and a symlink kept its " -> target" suffix.
+ *
+ * WARNING: against firmware older than #1652, test_fs_ftp_listing() wedges
+ * the FujiNet -- it sits in that infinite loop and never answers, so the
+ * test times out and the device needs a reset. That is the bug reproducing,
+ * not a fault in the test.
+ */
+
 #include "broken.h"
 
 #include "harness.h"
@@ -431,6 +447,51 @@ void test_fs_lock_unlock(void)
 
   err = network_fs_unlock(g.fs.path);
   TEST("network_fs_unlock is accepted", err == FN_ERR_OK);
+
+  END_OF_TEST();
+#endif
+}
+
+/* FTP directory listing (fujinet-firmware #1652). Read-only against a
+ * public anonymous server, so unlike the rest of this file it creates
+ * nothing and cleans nothing up. */
+void test_fs_ftp_listing(void)
+{
+  int16_t count;
+  uint8_t err;
+
+  SECTION("FTP directory listing");
+
+#ifdef FN_BROKEN_network_fs
+  SKIP(network_fs);
+  END_OF_TEST();
+#else
+  printf("  contents of %s\n", FTP_HOST);
+  count = fs_list(FTP_ROOT);
+
+  /* Before #1652 the firmware never answers this open -- it is still
+   * appending empty entries to its own buffer. */
+  TEST("FTP directory listing is not empty", count > 0);
+
+  /* welcome.msg sorts last, and the last entry was what the old
+   * `dirBuffer.eof() ? UNSPECIFIED : NONE` threw away. */
+  TEST("the last entry is not dropped", fs_listed("welcome.msg"));
+  TEST("a plain file is listed", fs_listed("robots.txt"));
+
+  /* A symlink to a directory. The old code left the name as
+   * "breakpoint -> users/breakpoint/". */
+  TEST("a symlink keeps its own name", fs_listed("breakpoint/"));
+
+  /* The UNIX "total" header and anything else ftpparse rejects used to
+   * come back as an entry literally named "???". */
+  TEST("no entry is named ???", !fs_listed("???"));
+
+  /* Without this the checks above would pass even if the open succeeded
+   * unconditionally. */
+  err = fs_open_result(FTP_MISSING_DIR,
+                       network_open(FTP_MISSING_DIR, OPEN_MODE_HTTP_PROPFIND, DIR_FORMAT_RAW));
+  TEST("an FTP directory that does not exist fails to open", err != FN_ERR_OK);
+  network_close(FTP_MISSING_DIR);
 
   END_OF_TEST();
 #endif
