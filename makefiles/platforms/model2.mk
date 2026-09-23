@@ -6,7 +6,7 @@ include $(MWD)/common.mk
 include $(MWD)/toolchains/z88dk.mk
 
 MODEL2_FLAGS = +cpm
-CFLAGS += $(MODEL2_FLAGS)
+CFLAGS += $(MODEL2_FLAGS) -D__TRS80M2__
 LDFLAGS += $(MODEL2_FLAGS)
 ifneq ($(IS_LIBRARY),1)
   LDFLAGS += -create-app
