@@ -439,9 +439,12 @@ void test_fs_lock_unlock(void)
 void test_fs_ftp_listing(void)
 {
   int16_t count;
+  int16_t r;
+  uint16_t bytes_waiting, total;
   uint8_t err;
+  uint8_t conn, nerr, attempt, drained;
 
-  SECTION("FTP directory listing");
+  SECTION("FTP directory listing and file read");
 
 #ifdef FN_BROKEN_network_fs
   SKIP(network_fs);
@@ -460,6 +463,48 @@ void test_fs_ftp_listing(void)
   TEST("a symlink keeps its own name", fs_listed("breakpoint/"));
 
   TEST("no entry is named ???", !fs_listed("???"));
+
+  /* Exercise the STATUS -> READ contract for an FTP file. STATUS may fill
+   * receiveBuffer before the socket closes; the next READ must consume the
+   * exact count STATUS returned. This is the regression covered by
+   * fujinet-firmware PR #1690. */
+  total = 0;
+  drained = 0;
+  err = fs_open_result(FTP_FILE,
+                       network_open(FTP_FILE, OPEN_MODE_HTTP_GET, OPEN_TRANS_NONE));
+  TEST("FTP file opens", err == FN_ERR_OK);
+  if (err == FN_ERR_OK) {
+    for (attempt = 0; attempt < 32 && !drained; attempt++) {
+      bytes_waiting = 0;
+      conn = 0;
+      nerr = 0;
+      err = network_status(FTP_FILE, &bytes_waiting, &conn, &nerr);
+      TEST("FTP file STATUS succeeds", err == FN_ERR_OK);
+      if (err != FN_ERR_OK)
+        break;
+
+      printf("  file status: bytes_waiting=%u conn=%u net_error=%u\n",
+             bytes_waiting, conn, nerr);
+      if (bytes_waiting == 0) {
+        if (!conn)
+          drained = 1;
+        continue;
+      }
+
+      TEST("FTP STATUS fits the READ buffer", bytes_waiting <= sizeof(g.net));
+      if (bytes_waiting > sizeof(g.net))
+        break;
+
+      r = network_read(FTP_FILE, g.net, bytes_waiting);
+      TEST("FTP READ returns STATUS byte count", r == (int16_t)bytes_waiting);
+      if (r <= 0)
+        break;
+      total += (uint16_t)r;
+    }
+  }
+  TEST("FTP file returns data", total > 0);
+  TEST("FTP STATUS/READ loop reaches EOF", drained);
+  network_close(FTP_FILE);
 
   /* Without this the checks above would pass even if the open succeeded
    * unconditionally. */
