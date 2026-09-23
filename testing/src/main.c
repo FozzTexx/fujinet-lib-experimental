@@ -23,7 +23,6 @@
 #if !FUJI_TESTS && !NETWORK_TESTS && !NETWORK2_TESTS && !HTML_TESTS \
   && !CALMAIL_TESTS && !REGRESSION_TESTS && !CLOCK_TESTS && !DISK_TESTS \
   && !QRCODE_TESTS && !FS_TESTS && !APPKEY_TESTS && !DEVLIST_TESTS \
-  && !FTP_TESTS \
   && !PARSE_ERROR_TESTS
 #error "You need to choose some tests"
 #endif
@@ -40,7 +39,6 @@
 #include "fdsk.h"
 #include "qrcode.h"
 #include "fs.h"
-#include "ftp.h"
 #include "ftp.h"
 #include "devlist.h"
 
@@ -125,10 +123,6 @@ int main(void)
   test_multiple_network_devices();
   test_network_unit();
 #endif // NETWORK_TESTS
-
-#if FTP_TESTS
-  test_ftp_file_status_read();
-#endif // FTP_TESTS
 
 #if NETWORK2_TESTS
   /* network2.h - the v5 command additions */
