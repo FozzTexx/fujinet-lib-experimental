@@ -121,6 +121,7 @@
 #define FTP_HOST        "ftp.untergrund.net"
 #define FTP_ROOT        "N1:FTP://" FTP_HOST "/"
 #define FTP_MISSING_DIR "N1:FTP://" FTP_HOST "/fnftptest-never-created/"
+#define FTP_FILE        "N1:FTP://" FTP_HOST "/robots.txt"
 
 /* Deterministic byte stream (byte i == 'a' + i % 26) served with HTTP
  * Range support, for the seek/tell and read-count tests */
