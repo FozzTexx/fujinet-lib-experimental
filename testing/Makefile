@@ -5,6 +5,7 @@ PRODUCTS += clock
 PRODUCTS += devlist
 PRODUCTS += disk
 PRODUCTS += netfile
+PRODUCTS += ftp
 PRODUCTS += net5plus
 PRODUCTS += network
 PRODUCTS += parserr
@@ -58,6 +59,7 @@ disk_SRC_DIRS = $(MAIN_SRC_DIRS)
 netfile_SRC_DIRS = $(MAIN_SRC_DIRS)
 net5plus_SRC_DIRS = $(MAIN_SRC_DIRS)
 network_SRC_DIRS = $(MAIN_SRC_DIRS)
+ftp_SRC_DIRS = $(MAIN_SRC_DIRS)
 parserr_SRC_DIRS = $(MAIN_SRC_DIRS)
 qrcode_SRC_DIRS = $(MAIN_SRC_DIRS)
 html_SRC_DIRS = $(MAIN_SRC_DIRS)
@@ -71,6 +73,7 @@ clock_CFLAGS = -DCLOCK_TESTS=1
 disk_CFLAGS = -DDISK_TESTS=1
 qrcode_CFLAGS = -DQRCODE_TESTS=1
 netfile_CFLAGS = -DFS_TESTS=1
+ftp_CFLAGS = -DFTP_TESTS=1
 appkey_CFLAGS = -DAPPKEY_TESTS=1
 devlist_CFLAGS = -DDEVLIST_TESTS=1
 
