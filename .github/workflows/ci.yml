@@ -27,7 +27,7 @@ jobs:
           - msx
 
     container:
-      image: fozztexx/defoogi:1.4.5
+      image: fozztexx/defoogi:1.4.8
 
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: fozztexx/defoogi:1.4.5
+      image: fozztexx/defoogi:1.4.8
 
     steps:
       - uses: actions/checkout@v4
@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: fozztexx/defoogi:1.4.7
+      image: fozztexx/defoogi:1.4.8
 
     steps:
       - uses: actions/checkout@v4
