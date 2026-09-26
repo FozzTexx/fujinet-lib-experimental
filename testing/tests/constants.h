@@ -104,6 +104,10 @@
 
 #define TNFS_COPY_SOURCE_HOST "tnfs.fujinet.online"
 
+/* Opens that fail for a known reason, to check what STATUS reports after. */
+#define NET_MISSING_FILE   "N1:TNFS://" TNFS_COPY_SOURCE_HOST "/fnlibtest-never-created.txt"
+#define NET_BAD_PROTOCOL   "N1:NOTAPROTOCOL://bad_host/"
+
 /* Public WebDAV test server used by the network_fs tests. Anything created
  * at the root is removed by the server within 72 hours. Reached through
  * webdavserver.net rather than ajaxfilebrowser.com, whose certificate is
