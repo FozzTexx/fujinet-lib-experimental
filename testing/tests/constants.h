@@ -104,6 +104,10 @@
 
 #define TNFS_COPY_SOURCE_HOST "tnfs.fujinet.online"
 
+/* A TNFS server the lock test can write to, running a tnfsd that answers
+ * CHMOD (FujiNetWIFI/tnfsd#34). The test is skipped while this is unset. */
+/* #define TNFS_RW_ROOT "N1:TNFS://tnfs.example/" */
+
 /* Public WebDAV test server used by the network_fs tests. Anything created
  * at the root is removed by the server within 72 hours. Reached through
  * webdavserver.net rather than ajaxfilebrowser.com, whose certificate is
