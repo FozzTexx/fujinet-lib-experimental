@@ -131,3 +131,20 @@ coco/disk-post:: $(COCOMENU_BIN) $(COCOMENU_BAS)
 	$(call copy-to-disk,-b -2,$(COCOMENU_BIN),COCOMENU.BIN,$(DISK))
 	$(call copy-to-disk,-a -0 -l,$(COCOMENU_BAS),AUTOEXEC.BAS,$(DISK))
 endif
+
+# adam-menu is its own repo too. Build it against this repo's library.
+ADAM_MENU_REPO ?= https://github.com/RichStephens/adam-menu.git
+ADAM_MENU_DIR = $(CACHE_DIR)/adam/adam-menu
+ADAM_MENU_DDP = $(ADAM_MENU_DIR)/r2r/adam/adam-menu.ddp
+
+$(ADAM_MENU_DIR):
+	git clone --depth 1 $(ADAM_MENU_REPO) $@
+
+$(ADAM_MENU_DDP): | $(ADAM_MENU_DIR)
+	$(MAKE) -C $(ADAM_MENU_DIR) FUJINET_LIB=$(abspath ..) adam
+
+# NO_ADAM_MENU=1 leaves adam-menu.ddp out of r2r/adam.
+ifndef NO_ADAM_MENU
+adam/r2r-post:: $(ADAM_MENU_DDP)
+	cp $(ADAM_MENU_DDP) $(R2R_PD)/
+endif
