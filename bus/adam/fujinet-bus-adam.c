@@ -4,8 +4,6 @@
 #include "fujinet-const.h"
 #include <string.h>
 
-#define MAX_ADAM_PACKET 512
-
 #define DCB_COUNT_ADDR ((uint8_t *) 0xFEC3)
 #define DCB_TABLE_ADDR ((DCB *) 0xFEC4)
 
