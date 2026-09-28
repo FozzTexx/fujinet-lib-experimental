@@ -108,6 +108,10 @@
  * CHMOD (FujiNetWIFI/tnfsd#34). The test is skipped while this is unset. */
 #define TNFS_RW_ROOT "N1:TNFS://10.4.0.1/"
 
+/* Opens that fail for a known reason, to check what STATUS reports after. */
+#define NET_MISSING_FILE   "N1:TNFS://" TNFS_COPY_SOURCE_HOST "/fnlibtest-never-created.txt"
+#define NET_BAD_PROTOCOL   "N1:NOTAPROTOCOL://bad_host/"
+
 /* Public WebDAV test server used by the network_fs tests. Anything created
  * at the root is removed by the server within 72 hours. Reached through
  * webdavserver.net rather than ajaxfilebrowser.com, whose certificate is
@@ -185,6 +189,7 @@
 #define NETWORK_SUCCESS 0
 #define NETWORK_ERROR_END_OF_FILE 136
 #define NETWORK_ERROR_GENERAL 144
+#define NETWORK_ERROR_FILE_NOT_FOUND 170
 #define NETWORK_ERROR_NOT_CONNECTED 207
 #define NETWORK_ERROR_COULD_NOT_PARSE_JSON 213
 typedef uint8_t FN_ERR;

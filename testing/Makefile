@@ -77,13 +77,16 @@ devlist_CFLAGS = -DDEVLIST_TESTS=1
 
 include ../makefiles/toplevel-rules.mk
 
-# Seven test binaries do not fit the default single density ATR or a 140kb
+# The test binaries do not fit the default single density ATR or a 140kb
 # ProDOS volume.
 DISK_TOOL_FLAGS_ATARI = -D -m -b MyPicoDos406
 DISK_SIZE = 800kb
 
 CFLAGS += -DBUILD_$(PLATFORM_UC) -DPLATFORM=$(DSTRING_OPEN)$(PLATFORM)$(DSTRING_CLOSE)
+CFLAGS += -DTEST_PROGRAM=$(DSTRING_OPEN)$(PRODUCT)$(DSTRING_CLOSE)
 LDFLAGS_EXTRA_COCO = --org=0E00 --limit=7C00
+# Exit to EOS_START, which reboots from D1
+LDFLAGS_EXTRA_ADAM = -pragma-define:CRT_ON_EXIT=0xFC30
 
 TESTS_DIR = tests
 TESTS_LIB = fnlib-test
@@ -127,4 +130,27 @@ ifndef NO_COCO_MENU
 coco/disk-post:: $(COCOMENU_BIN) $(COCOMENU_BAS)
 	$(call copy-to-disk,-b -2,$(COCOMENU_BIN),COCOMENU.BIN,$(DISK))
 	$(call copy-to-disk,-a -0 -l,$(COCOMENU_BAS),AUTOEXEC.BAS,$(DISK))
+endif
+
+# adam-menu is its own repo too. It is built with the tests' FUJINET_LIB,
+# made absolute when it is a path since the menu builds from its own directory.
+ADAM_MENU_REPO ?= https://github.com/RichStephens/adam-menu.git
+ADAM_MENU_DIR = $(CACHE_DIR)/adam/adam-menu
+ADAM_MENU_DDP = $(ADAM_MENU_DIR)/r2r/adam/adam-menu.ddp
+ADAM_MENU_FUJINET_LIB = $(if $(wildcard $(FUJINET_LIB)),$(abspath $(FUJINET_LIB)),$(FUJINET_LIB))
+
+$(ADAM_MENU_DIR):
+	git clone --depth 1 $(ADAM_MENU_REPO) $@
+
+$(ADAM_MENU_DDP): | $(ADAM_MENU_DIR)
+	$(MAKE) -C $(ADAM_MENU_DIR) FUJINET_LIB=$(ADAM_MENU_FUJINET_LIB) adam
+
+# The menu needs fujinet-const.h, which fujinet-lib 4.11.2 lacks. The check is
+# in the recipe because FUJINET_LIB_INCLUDE is set only after this file is read.
+# NO_ADAM_MENU=1 leaves adam-menu.ddp out of r2r/adam.
+ifndef NO_ADAM_MENU
+adam/r2r-post::
+	$(if $(wildcard $(FUJINET_LIB_INCLUDE)/fujinet-const.h), \
+	  $(MAKE) -f $(PLATFORM_MK) $(ADAM_MENU_DDP) && cp $(ADAM_MENU_DDP) $(R2R_PD)/, \
+	  @echo "Skipping adam-menu: $(FUJINET_LIB_INCLUDE) has no fujinet-const.h")
 endif
