@@ -9,7 +9,7 @@
 
 #define DCB_COMPLETE_MASK 0x80
 
-static uint8_t fb_packet[MAX_ADAM_PACKET];
+static uint8_t fb_packet[MAX_ADAM_PACKET_REPLY];
 
 DCB *dcb_find(uint8_t device)
 {
