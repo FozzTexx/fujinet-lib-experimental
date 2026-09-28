@@ -42,9 +42,6 @@ enum {
   PARSER_XML = 3,
 };
 
-/* Declared but never set by the library. */
-extern uint16_t fn_bytes_read;
-
 /**
  * Convert device specific error in code to FujiNet Network library error, agnostic of device.
  * Library code calls this when it encounters an error to return value applications should use.
