@@ -25,6 +25,7 @@ jobs:
           - model2
           - msdos
           - msx
+          - sms
 
     container:
       image: fozztexx/defoogi:1.4.8
