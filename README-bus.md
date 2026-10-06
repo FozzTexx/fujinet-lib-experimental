@@ -3,6 +3,7 @@ Platforms with true bi-directional variable payload length:
 * Adam
 * Apple II
 * MS-DOS (RS232)
+* Sega Master System (FujiNet cartridge mailbox)
 * MSX (RS232)
 * C64
 * Lynx
