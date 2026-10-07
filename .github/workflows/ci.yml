@@ -19,6 +19,7 @@ jobs:
           - adam
           - apple2
           - atari
+          - atari7800
           - c64
           - coco
           - lynx
