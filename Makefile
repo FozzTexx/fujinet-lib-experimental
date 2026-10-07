@@ -2,6 +2,7 @@ PRODUCT = fujinet.lib
 PLATFORMS += adam
 PLATFORMS += apple2
 PLATFORMS += atari
+PLATFORMS += atari7800
 PLATFORMS += c64
 PLATFORMS += coco
 PLATFORMS += lynx
